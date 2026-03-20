@@ -1,0 +1,90 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../../api/api";
+import OAuthButtons from "./OAuthButtons";
+import "./auth.css";
+
+const Login = ({ onLogin }) => {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.post("/api/auth/login", form);
+      localStorage.setItem("token", res.data.token);
+      onLogin?.();
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-brand">
+          <span className="auth-brand-icon">🌾</span>
+          <h1 className="auth-brand-name">CropYield</h1>
+        </div>
+
+        <h2 className="auth-title">Welcome back</h2>
+        <p className="auth-subtitle">Sign in to your farming dashboard</p>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          {error && <p className="auth-error">⚠ {error}</p>}
+
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? <span className="auth-spinner" /> : "Login"}
+          </button>
+        </form>
+
+        <OAuthButtons mode="login" />
+
+        <p className="auth-footer">
+          Don't have an account?{" "}
+          <Link to="/signup">Sign Up</Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
