@@ -1,6 +1,7 @@
 function HowItWorks() {
   return (
-    <section className="bg-gray-100 py-20 px-10 text-center">
+    <section id="how" className="bg-gray-100 py-20 px-10 text-center">
+
 
       <h2 className="text-3xl font-bold mb-12">
         How It Works

@@ -9,10 +9,10 @@ function Navbar() {
       </h1>
 
       <div className="space-x-6 hidden md:flex">
-        <a href="#">Home</a>
-        <a href="#">Features</a>
-        <a href="#">How it Works</a>
-        <a href="#">Contact</a>
+        <Link to="/">Home</Link>
+        <Link to="/prediction">Prediction</Link>
+        <a href="#features">Features</a>
+        <a href="#how">How it Works</a>
       </div>
 
       <div className="space-x-3">

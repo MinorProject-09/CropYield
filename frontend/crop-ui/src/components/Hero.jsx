@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 function Hero() {
   return (
     <section className="bg-green-100 py-28 text-center">
@@ -12,13 +14,17 @@ function Hero() {
       </p>
 
       <div className="space-x-4">
-        <button className="bg-green-700 text-white px-6 py-3 rounded-lg">
-          Try Prediction
-        </button>
+        <Link to="/prediction">
+          <button type="button" className="bg-green-700 text-white px-6 py-3 rounded-lg">
+            Try Prediction
+          </button>
+        </Link>
 
-        <button className="border px-6 py-3 rounded-lg">
-          Learn More
-        </button>
+        <a href="#features">
+          <button type="button" className="border px-6 py-3 rounded-lg">
+            Learn More
+          </button>
+        </a>
       </div>
 
     </section>
