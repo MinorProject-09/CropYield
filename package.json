@@ -1,0 +1,12 @@
+{
+  "name": "cropyield",
+  "private": true,
+  "description": "Root scripts — run npm from this folder (CropYield), not from /Users/OM",
+  "scripts": {
+    "postinstall": "npm install --prefix frontend/crop-ui && npm install --prefix backend",
+    "install:all": "npm install --prefix frontend/crop-ui && npm install --prefix backend",
+    "dev": "npm run dev --prefix frontend/crop-ui",
+    "dev:frontend": "npm run dev --prefix frontend/crop-ui",
+    "dev:backend": "npm run dev --prefix backend"
+  }
+}
