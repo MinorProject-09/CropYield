@@ -1,25 +1,31 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./auth.css";
 
-const OAuthCallback = ({ onLogin }) => {
+const OAuthCallback = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const token = query.get("token");
     const error = query.get("error");
 
-    if (token) {
-      localStorage.setItem("token", token);
-      onLogin?.();
-      navigate("/dashboard");
-    } else {
-      // If no token or error, redirect to login
-      navigate("/login");
+    if (error) {
+      navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
+      return;
     }
-  }, [location.search, navigate, onLogin]); // ✅ Fix: proper dependency array
+
+    if (token) {
+      login(token)
+        .then(() => navigate("/dashboard", { replace: true }))
+        .catch(() => navigate("/login?error=session_failed", { replace: true }));
+    } else {
+      navigate("/login", { replace: true });
+    }
+  }, [location.search, navigate, login]);
 
   return (
     <div className="auth-page">

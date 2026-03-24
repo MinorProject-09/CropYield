@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import api from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 import OAuthButtons from "./OAuthButtons";
 import "./auth.css";
 
-const SignUp = ({ onSignUp }) => {
+const SignUp = () => {
   const navigate = useNavigate();
+  const { login, user, loading: authLoading } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -22,17 +24,34 @@ const SignUp = ({ onSignUp }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  if (authLoading) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card auth-callback">
+          <p className="auth-subtitle">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
       const res = await api.post("/api/auth/register", form);
-      localStorage.setItem("token", res.data.token);
-      onSignUp?.();
-      navigate("/dashboard");
+      await login(res.data.token, res.data.user);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Signup failed. Backend may be unreachable.";
+      setError(message);
     } finally {
       setLoading(false);
     }

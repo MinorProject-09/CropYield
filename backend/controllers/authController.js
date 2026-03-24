@@ -2,6 +2,13 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+function toPublicUser(doc) {
+  if (!doc) return null;
+  const user = doc.toObject ? doc.toObject() : { ...doc };
+  delete user.password;
+  return user;
+}
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password, farmSize, soilType } = req.body;
@@ -13,21 +20,31 @@ exports.register = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
+    const farmSizeNum =
+      farmSize === "" || farmSize === undefined || farmSize === null
+        ? undefined
+        : Number(farmSize);
+
     const user = await User.create({
-      name, email, password: hashed, farmSize, soilType
+      name,
+      email,
+      password: hashed,
+      farmSize: Number.isFinite(farmSizeNum) ? farmSizeNum : undefined,
+      soilType: soilType || undefined,
+      provider: "local",
     });
 
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }   // ← good practice to add
+      { expiresIn: "7d" }
     );
 
-    res.json({ token, user });
+    res.json({ token, user: toPublicUser(user) });
 
   } catch (err) {
-    console.error("❌ Register error:", err.message);  // ← shows real error in terminal
-    res.status(500).json({ message: err.message });    // ← sends response so no CORS hang
+    console.error("❌ Register error:", err.message);
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -36,7 +53,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) {
+    if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -51,13 +68,25 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, user });
+    res.json({ token, user: toPublicUser(user) });
 
   } catch (err) {
     console.error("❌ Login error:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    res.json({ user: toPublicUser(req.user) });
+  } catch (err) {
+    console.error("❌ getMe error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const frontendBase = () =>
+  process.env.FRONTEND_URL || "http://localhost:5173";
 
 exports.oauthSuccess = (req, res) => {
   try {
@@ -67,10 +96,10 @@ exports.oauthSuccess = (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    res.redirect(`${frontendBase()}/auth/callback?token=${token}`);
 
   } catch (err) {
     console.error("❌ OAuth error:", err.message);
-    res.redirect(`${process.env.FRONTEND_URL}/login?error=oauth_failed`);
+    res.redirect(`${frontendBase()}/login?error=oauth_failed`);
   }
 };
