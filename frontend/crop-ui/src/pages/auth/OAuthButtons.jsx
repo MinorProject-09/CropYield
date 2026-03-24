@@ -1,7 +1,7 @@
 import React from "react";
 
 const OAuthButtons = ({ mode }) => {
-  const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
   return (
     <div className="oauth-section">
