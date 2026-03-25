@@ -856,16 +856,24 @@ export default function PredictionPage() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Result</h3>
             {!result ? (
               <div className="rounded-xl border border-dashed border-green-200 bg-green-50/50 p-6 text-center text-sm text-gray-600">
-                Submit the form to see the predicted yield from the API.
+                Submit the form to see the recommended crop from the API.
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-6">
                   <p className="text-xs font-medium uppercase tracking-wider text-green-800">
-                    Predicted yield (model output)
+                    Recommended crop (model output)
                   </p>
                   <p className="mt-2 text-4xl font-semibold tabular-nums text-gray-900">
-                    {result.predictedYield}
+                    {result.recommendedCrop || "—"}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-700">
+                    Confidence:{" "}
+                    <span className="font-semibold tabular-nums text-gray-900">
+                      {typeof result.confidence === "number"
+                        ? `${Math.round(result.confidence * 100)}%`
+                        : "—"}
+                    </span>
                   </p>
                   <p className="mt-2 text-xs text-gray-600">{result.message || "Prediction generated"}</p>
                 </div>
