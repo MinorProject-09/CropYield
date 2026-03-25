@@ -34,7 +34,13 @@ def home():
 def predict(data: PredictRequest):
     try:
         features = np.array([[
-            
+            data.temperature,
+            data.humidity,
+            data.rainfall,
+            data.ph,
+            data.N,
+            data.P,
+            data.K,
         ]])
 
         # Best class + confidence from probability distribution
