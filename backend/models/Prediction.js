@@ -13,7 +13,9 @@ const predictionSchema = new mongoose.Schema({
   potassium: { type: Number, required: true },
   cropMonth: { type: Number, required: true },
   duration: { type: Number, required: true },
-  predictedYield: { type: Number, required: true },
+  recommendedCrop: { type: String, required: true },
+  confidence: { type: Number, required: true },
+  predictedYield: { type: Number, required: false }, // legacy; no longer used
   createdAt: {
     type: Date,
     default: Date.now,
