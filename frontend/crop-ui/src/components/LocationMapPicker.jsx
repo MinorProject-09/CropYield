@@ -11,11 +11,7 @@ const DEFAULT_ZOOM = 5;
 
 function fixLeafletIcons() {
   delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl,
-    iconUrl,
-    shadowUrl,
-  });
+  L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
 }
 
 function MapClick({ onPick }) {
@@ -30,47 +26,44 @@ function MapClick({ onPick }) {
   return null;
 }
 
-/** Pans the map when focusNonce changes (e.g. after “Use my location”), not on every drag. */
+/** Pans/flies the map whenever focusNonce increments (external pin change, e.g. geolocation). */
 function FlyToExternalPin({ lat, lng, focusNonce }) {
   const map = useMap();
   const prevNonce = useRef(0);
+
   useEffect(() => {
     if (focusNonce > 0 && focusNonce !== prevNonce.current) {
       prevNonce.current = focusNonce;
       if (Number.isFinite(lat) && Number.isFinite(lng)) {
-        map.setView([lat, lng], Math.max(map.getZoom(), 13), { animate: true });
+        map.flyTo([lat, lng], Math.max(map.getZoom(), 14), { animate: true, duration: 1.2 });
       }
     }
   }, [focusNonce, lat, lng, map]);
+
   return null;
 }
 
 /**
- * Interactive map (OpenStreetMap tiles): click to pin, drag pin to adjust. Lat/lng update via onChange.
+ * Interactive Leaflet map with click-to-pin, draggable marker, and external fly-to support.
+ * Props:
+ *   latitude / longitude  – current pin (string or number, may be empty)
+ *   onChange({ latitude, longitude }) – called with 6-decimal strings on every pick/drag
+ *   focusNonce            – increment to fly the map to the current lat/lng (e.g. after geolocation)
  */
 export default function LocationMapPicker({ latitude, longitude, onChange, focusNonce = 0 }) {
-  useEffect(() => {
-    fixLeafletIcons();
-  }, []);
+  useEffect(() => { fixLeafletIcons(); }, []);
 
   const lat = parseFloat(latitude);
   const lng = parseFloat(longitude);
   const hasPin =
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    lat >= -90 &&
-    lat <= 90 &&
-    lng >= -180 &&
-    lng <= 180;
+    Number.isFinite(lat) && Number.isFinite(lng) &&
+    lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 
   const center = hasPin ? [lat, lng] : DEFAULT_CENTER;
-  const zoom = hasPin ? 13 : DEFAULT_ZOOM;
+  const zoom   = hasPin ? 14 : DEFAULT_ZOOM;
 
   function handlePick(a, b) {
-    onChange({
-      latitude: a.toFixed(6),
-      longitude: b.toFixed(6),
-    });
+    onChange({ latitude: a.toFixed(6), longitude: b.toFixed(6) });
   }
 
   function handleDragEnd(e) {
@@ -87,7 +80,7 @@ export default function LocationMapPicker({ latitude, longitude, onChange, focus
       <MapContainer
         center={center}
         zoom={zoom}
-        className="z-0 h-[min(420px,55vh)] w-full min-h-[320px]"
+        className="z-0 h-[min(420px,55vh)] min-h-[320px] w-full"
         scrollWheelZoom
       >
         <TileLayer
@@ -95,16 +88,14 @@ export default function LocationMapPicker({ latitude, longitude, onChange, focus
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapClick onPick={handlePick} />
-        {hasPin ? <FlyToExternalPin lat={lat} lng={lng} focusNonce={focusNonce} /> : null}
-        {hasPin ? (
+        {hasPin && <FlyToExternalPin lat={lat} lng={lng} focusNonce={focusNonce} />}
+        {hasPin && (
           <Marker
             position={[lat, lng]}
             draggable
-            eventHandlers={{
-              dragend: handleDragEnd,
-            }}
+            eventHandlers={{ dragend: handleDragEnd }}
           />
-        ) : null}
+        )}
       </MapContainer>
     </div>
   );
