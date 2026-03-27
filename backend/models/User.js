@@ -59,7 +59,10 @@ const UserSchema = new mongoose.Schema(
   emailVerified: {
     type: Boolean,
     default: false
-  }
+  },
+
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date }
 
 },
 { timestamps: true }

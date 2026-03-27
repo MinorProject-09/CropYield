@@ -332,3 +332,52 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Success info message ── */
+.auth-info {
+  font-size: 0.85rem;
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin: 0;
+}
+
+/* ── Small inline link (e.g. "Forgot password?") ── */
+.auth-link-small {
+  font-size: 0.8rem;
+  color: var(--green-500);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.auth-link-small:hover {
+  color: var(--green-700);
+  text-decoration: underline;
+}
+
+/* ── Unstyled button that looks like a link ── */
+.auth-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--green-500);
+  font-weight: 600;
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.auth-link-btn:hover:not(:disabled) {
+  color: var(--green-700);
+  text-decoration: underline;
+}
+
+.auth-link-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

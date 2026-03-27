@@ -12,15 +12,15 @@ const Login = () => {
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const q = searchParams.get("error");
-    if (q === "oauth_failed") {
-      setError("Google or GitHub sign-in failed. Try again or use email.");
-    } else if (q === "session_failed") {
-      setError("Could not complete sign-in. Please try again.");
-    }
+    const r = searchParams.get("reset");
+    if (q === "oauth_failed") setError("Google or GitHub sign-in failed. Try again or use email.");
+    else if (q === "session_failed") setError("Could not complete sign-in. Please try again.");
+    if (r === "success") setInfo("Password reset successfully. You can now log in.");
   }, [searchParams]);
 
   if (authLoading) {
@@ -33,13 +33,9 @@ const Login = () => {
     );
   }
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (user) return <Navigate to="/dashboard" replace />;
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,11 +46,13 @@ const Login = () => {
       await login(res.data.token, res.data.user);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.message ||
-        "Login failed. Backend may be unreachable.";
-      setError(message);
+      const data = err.response?.data;
+      if (data?.requiresVerification) {
+        // Redirect to verify page with email pre-filled
+        navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+      setError(data?.message || err.message || "Login failed. Backend may be unreachable.");
     } finally {
       setLoading(false);
     }
@@ -96,9 +94,15 @@ const Login = () => {
               onChange={handleChange}
               required
             />
+            <div style={{ textAlign: "right", marginTop: "0.25rem" }}>
+              <Link to="/forgot-password" className="auth-link-small">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           {error && <p className="auth-error">⚠ {error}</p>}
+          {info && <p className="auth-info">✓ {info}</p>}
 
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? <span className="auth-spinner" /> : "Login"}
@@ -108,8 +112,7 @@ const Login = () => {
         <OAuthButtons mode="login" />
 
         <p className="auth-footer">
-          Don't have an account?{" "}
-          <Link to="/signup">Sign Up</Link>
+          Don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </div>
     </div>
