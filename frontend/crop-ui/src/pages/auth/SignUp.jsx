@@ -44,6 +44,11 @@ const SignUp = () => {
     setError("");
     try {
       const res = await api.post("/api/auth/register", form);
+      // Registration now requires email verification
+      if (res.data.requiresVerification) {
+        navigate(`/verify-email?email=${encodeURIComponent(res.data.email)}`);
+        return;
+      }
       await login(res.data.token, res.data.user);
       navigate("/dashboard", { replace: true });
     } catch (err) {
