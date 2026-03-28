@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 
 const predictionSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   location: {
     mode: { type: String, enum: ["map", "details"], required: true },
     latitude: { type: Number, default: null },

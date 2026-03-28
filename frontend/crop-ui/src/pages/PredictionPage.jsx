@@ -16,6 +16,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
+import { getCropInfo } from "../data/cropInfo";
 import {
   buildStructuredDetailsLine,
   buildStructuredGeocodeQuery,
@@ -649,23 +650,31 @@ export default function PredictionPage() {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* ── Recommended crop ── */}
                 <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-6">
                   <p className="text-xs font-medium uppercase tracking-wider text-green-800">
                     {t("recommendedCrop")}
                   </p>
-                  <p className="mt-2 text-4xl font-semibold text-gray-900">
-                    {result.recommendedCrop || "—"}
+                  <p className="mt-2 text-4xl font-semibold text-gray-900 capitalize">
+                    {getCropInfo(result.recommendedCrop)?.emoji || "🌾"} {result.recommendedCrop || "—"}
                   </p>
-                  <p className="mt-2 text-sm text-gray-700">
-                    {t("confidence")}:{" "}
-                    <span className="font-semibold text-gray-900">
-                      {typeof result.confidence === "number" ? `${Math.round(result.confidence * 100)}%` : "—"}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-xs text-gray-600">{result.message || "Prediction generated"}</p>
+                  {/* Confidence bar */}
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <span>{t("confidence")}</span>
+                      <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(result.confidence * 100)}%` : "—"}</span>
+                    </div>
+                    <div className="h-2 bg-green-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${result.confidence >= 0.75 ? "bg-green-500" : result.confidence >= 0.5 ? "bg-amber-400" : "bg-red-400"}`}
+                        style={{ width: `${Math.round((result.confidence || 0) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* 🔊 Read result aloud button */}
+              
+                {/* ── Voice read ── */}
                 <VoiceSpeaker
                   text={resultSpeechText}
                   label={t("speakResult")}
@@ -673,8 +682,8 @@ export default function PredictionPage() {
                 />
 
                 {result.id && (
-                  <p className="break-all text-xs text-gray-500">
-                    Record ID: <span className="text-gray-700">{String(result.id)}</span>
+                  <p className="break-all text-xs text-gray-400">
+                    ID: {String(result.id)}
                   </p>
                 )}
               </div>

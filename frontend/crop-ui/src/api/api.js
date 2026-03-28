@@ -17,6 +17,18 @@ export function postMlPrediction(payload) {
   return api.post("/api/ml/prediction", payload);
 }
 
+export function getPredictionHistory() {
+  return api.get("/api/ml/prediction/history");
+}
+
+export function updateProfile(data) {
+  return api.put("/api/auth/profile", data);
+}
+
+export function deletePrediction(id) {
+  return api.delete(`/api/ml/prediction/${id}`);
+}
+
 /** q = address / place text; backend uses Google (if configured) then OSM */
 export function getGeocode(q) {
   return api.get("/api/geocode", { params: { q } });

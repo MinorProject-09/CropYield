@@ -3,6 +3,26 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/api";
 import "./auth.css";
 
+const PasswordHints = ({ password }) => {
+  if (!password) return null;
+  const hints = [
+    { ok: password.length >= 8,           text: "At least 8 characters" },
+    { ok: /[A-Z]/.test(password),         text: "One uppercase letter (A-Z)" },
+    { ok: /[a-z]/.test(password),         text: "One lowercase letter (a-z)" },
+    { ok: /_/.test(password),             text: "One underscore (_)" },
+    { ok: /^[A-Za-z0-9_]*$/.test(password), text: "Only letters, numbers, underscores" },
+  ];
+  return (
+    <ul className="auth-hints">
+      {hints.map((h) => (
+        <li key={h.text} className={h.ok ? "hint-ok" : "hint-fail"}>
+          {h.ok ? "✓" : "✗"} {h.text}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -76,11 +96,12 @@ const ResetPassword = () => {
               id="newPassword"
               name="newPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder="Min_8_Chars_1Upper"
               value={form.newPassword}
               onChange={handleChange}
               required
             />
+            <PasswordHints password={form.newPassword} />
           </div>
 
           <div className="form-group">
