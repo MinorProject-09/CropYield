@@ -18,6 +18,20 @@ function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// ── Password strength validator ──────────────────────────────────────────────
+// Rules: min 8 chars, at least one uppercase, one lowercase, one underscore
+// Only allows: A-Z, a-z, 0-9, _
+function validatePassword(password) {
+  if (!/^[A-Za-z0-9_]+$/.test(password)) {
+    return "Password can only contain letters, numbers, and underscores.";
+  }
+  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter.";
+  if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter.";
+  if (!/_/.test(password)) return "Password must contain at least one underscore (_).";
+  return null;
+}
+
 // ── Register ──────────────────────────────────────────────────────────────────
 exports.register = async (req, res) => {
   try {
@@ -27,6 +41,9 @@ exports.register = async (req, res) => {
     if (existing) {
       return res.status(400).json({ message: "User already exists" });
     }
+
+    const pwdError = validatePassword(password);
+    if (pwdError) return res.status(400).json({ message: pwdError });
 
     const hashed = await bcrypt.hash(password, 10);
     const farmSizeNum = farmSize === "" || farmSize == null ? undefined : Number(farmSize);
@@ -169,6 +186,9 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
+    const pwdError = validatePassword(newPassword);
+    if (pwdError) return res.status(400).json({ message: pwdError });
+
     const hashed = await bcrypt.hash(newPassword, 10);
     await User.updateOne({ email }, { password: hashed });
     await EmailOTP.deleteMany({ email, type: "reset" });
@@ -177,6 +197,30 @@ exports.resetPassword = async (req, res) => {
 
   } catch (err) {
     console.error("❌ resetPassword error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── Update Profile ────────────────────────────────────────────────────────────
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, farmSize, soilType, location } = req.body;
+    const updates = {};
+    if (name?.trim()) updates.name = name.trim();
+    if (farmSize !== undefined) updates.farmSize = farmSize === "" ? undefined : Number(farmSize);
+    if (soilType !== undefined) updates.soilType = soilType;
+    if (location?.state !== undefined) updates["location.state"] = location.state;
+    if (location?.district !== undefined) updates["location.district"] = location.district;
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select("-password -passwordResetToken -passwordResetExpires");
+
+    res.json({ user });
+  } catch (err) {
+    console.error("❌ updateProfile error:", err.message);
     res.status(500).json({ message: err.message });
   }
 };

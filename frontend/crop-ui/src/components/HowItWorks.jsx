@@ -1,45 +1,59 @@
+const steps = [
+  {
+    num: "01",
+    icon: "📍",
+    title: "Set Your Location",
+    desc: "Pin your farm on the interactive map, use GPS, or type your village name and PIN code. We resolve exact coordinates automatically.",
+  },
+  {
+    num: "02",
+    icon: "🧪",
+    title: "Enter Soil Data",
+    desc: "Input your soil pH and NPK (Nitrogen, Phosphorus, Potassium) values from your soil test report. Use voice input if you prefer.",
+  },
+  {
+    num: "03",
+    icon: "📅",
+    title: "Pick Planting Month",
+    desc: "Select the month you plan to sow and the expected crop duration in days. This aligns predictions with seasonal patterns.",
+  },
+  {
+    num: "04",
+    icon: "🌾",
+    title: "Get Your Recommendation",
+    desc: "Our ML model instantly returns the best crop for your conditions along with a confidence score and alternative suggestions.",
+  },
+];
+
 function HowItWorks() {
   return (
-    <section id="how" className="bg-gray-100 py-20 px-10 text-center">
-
-
-      <h2 className="text-3xl font-bold mb-12">
-        How It Works
-      </h2>
-
-      <div className="grid md:grid-cols-3 gap-10">
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">
-            1. Collect Data
-          </h3>
-          <p>
-            IoT sensors and weather APIs collect real-time environmental data.
+    <section id="how" className="py-20 px-6 bg-green-50">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <span className="text-green-700 text-sm font-semibold uppercase tracking-widest">Simple Process</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">How It Works</h2>
+          <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+            From soil data to crop recommendation in under a minute.
           </p>
         </div>
 
-        <div>
-          <h3 className="text-xl font-semibold mb-2">
-            2. AI Analysis
-          </h3>
-          <p>
-            Machine learning models process the data to predict crop yield.
-          </p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {steps.map((s, i) => (
+            <div key={s.num} className="relative bg-white rounded-2xl p-6 shadow-sm border border-green-100">
+              {/* Connector line */}
+              {i < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-10 right-0 w-6 h-0.5 bg-green-200 translate-x-full z-10" />
+              )}
+              <div className="text-xs font-bold text-green-400 mb-3 tracking-widest">{s.num}</div>
+              <div className="text-3xl mb-3">{s.icon}</div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">{s.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+            </div>
+          ))}
         </div>
-
-        <div>
-          <h3 className="text-xl font-semibold mb-2">
-            3. Smart Insights
-          </h3>
-          <p>
-            Farmers receive predictions, charts and crop recommendations.
-          </p>
-        </div>
-
       </div>
-
     </section>
-  )
+  );
 }
 
-export default HowItWorks
+export default HowItWorks;

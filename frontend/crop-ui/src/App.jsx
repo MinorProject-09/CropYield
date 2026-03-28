@@ -23,7 +23,11 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/prediction" element={<PredictionPage />} />
+          <Route path="/prediction" element={
+            <ProtectedRoute>
+              <PredictionPage />
+            </ProtectedRoute>
+          } />
           <Route path="/auth/callback" element={<OAuthCallback />} />
           <Route
             path="/dashboard"

@@ -1,4 +1,5 @@
 const Prediction = require("../models/Prediction")
+const jwt = require("jsonwebtoken")
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n))
@@ -162,6 +163,14 @@ exports.predictCropYield = async (req, res) => {
     }
 
     const prediction = new Prediction({
+      userId: (() => {
+        try {
+          const token = req.headers.authorization?.split(" ")[1];
+          if (!token) return null;
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          return decoded.id || null;
+        } catch { return null; }
+      })(),
       location: {
         mode: location.mode,
         latitude: location.latitude ?? null,
@@ -185,6 +194,7 @@ exports.predictCropYield = async (req, res) => {
       recommendedCrop: recommendedCrop.trim(),
       confidence: clamp01(confidence),
       mlInput: mlPayload,
+      weather: { temperature, humidity, rainfall },
       id: prediction._id,
     })
   } catch (err) {
@@ -192,3 +202,26 @@ exports.predictCropYield = async (req, res) => {
     res.status(500).json({ message: err.message || "Prediction failed" })
   }
 }
+
+exports.getPredictionHistory = async (req, res) => {
+  try {
+    const predictions = await Prediction.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+    res.json({ predictions });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deletePrediction = async (req, res) => {
+  try {
+    const prediction = await Prediction.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!prediction) return res.status(404).json({ message: "Prediction not found" });
+    await prediction.deleteOne();
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

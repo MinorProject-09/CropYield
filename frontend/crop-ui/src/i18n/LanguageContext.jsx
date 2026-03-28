@@ -1,12 +1,3 @@
-/**
- * LanguageContext.jsx
- * Provides language state + t() translation helper to the whole app.
- * Usage:
- *   import { useLanguage } from "../i18n/LanguageContext";
- *   const { t, lang, setLang, speechCode } = useLanguage();
- *   <p>{t("pageTitle")}</p>
- */
-
 import { createContext, useContext, useState } from "react";
 import translations, { LANGUAGES } from "./translations";
 
@@ -23,11 +14,6 @@ export function LanguageProvider({ children }) {
     try { localStorage.setItem("cropLang", code); } catch {}
   }
 
-  /**
-   * Translate a key.
-   * If the value is a function (e.g. resultSpeech), pass args through.
-   * Falls back to English, then to the key itself.
-   */
   function t(key, ...args) {
     const entry = translations[key];
     if (!entry) return key;
