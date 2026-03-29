@@ -6,10 +6,10 @@ import "./auth.css";
 const PasswordHints = ({ password }) => {
   if (!password) return null;
   const hints = [
-    { ok: password.length >= 8,           text: "At least 8 characters" },
-    { ok: /[A-Z]/.test(password),         text: "One uppercase letter (A-Z)" },
-    { ok: /[a-z]/.test(password),         text: "One lowercase letter (a-z)" },
-    { ok: /_/.test(password),             text: "One underscore (_)" },
+    { ok: password.length >= 8, text: "At least 8 characters" },
+    { ok: /[A-Z]/.test(password), text: "One uppercase letter (A-Z)" },
+    { ok: /[a-z]/.test(password), text: "One lowercase letter (a-z)" },
+    { ok: /_/.test(password), text: "One underscore (_)" },
     { ok: /^[A-Za-z0-9_]*$/.test(password), text: "Only letters, numbers, underscores" },
   ];
   return (
@@ -27,6 +27,9 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const emailFromQuery = searchParams.get("email") || "";
+  const phoneFromQuery = (searchParams.get("phone") || "").replace(/\D/g, "");
+
+  const channel = phoneFromQuery.length >= 10 ? "phone" : emailFromQuery ? "email" : "email";
 
   const [form, setForm] = useState({ otp: "", newPassword: "", confirm: "" });
   const [error, setError] = useState("");
@@ -40,18 +43,30 @@ const ResetPassword = () => {
       setError("Passwords don't match.");
       return;
     }
-    if (form.newPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (form.newPassword.length < 8) {
+      setError("Password must be at least 8 characters and meet strength rules.");
       return;
     }
     setLoading(true);
     setError("");
     try {
-      await api.post("/api/auth/reset-password", {
-        email: emailFromQuery,
-        otp: form.otp,
-        newPassword: form.newPassword,
-      });
+      const body =
+        channel === "phone" && phoneFromQuery.length >= 10
+          ? { phoneNumber: phoneFromQuery, otp: form.otp, newPassword: form.newPassword }
+          : { email: emailFromQuery.trim(), otp: form.otp, newPassword: form.newPassword };
+
+      if (channel === "phone" && phoneFromQuery.length < 10) {
+        setError("Invalid phone in link. Open reset from forgot-password again.");
+        setLoading(false);
+        return;
+      }
+      if (channel === "email" && !emailFromQuery.trim()) {
+        setError("Missing email. Use the link from forgot password or add ?email= in the URL.");
+        setLoading(false);
+        return;
+      }
+
+      await api.post("/api/auth/reset-password", body);
       navigate("/login?reset=success");
     } catch (err) {
       setError(err.response?.data?.message || "Reset failed. Try again.");
@@ -59,6 +74,9 @@ const ResetPassword = () => {
       setLoading(false);
     }
   };
+
+  const destinationLabel =
+    channel === "phone" && phoneFromQuery.length >= 10 ? phoneFromQuery : emailFromQuery || "(not set)";
 
   return (
     <div className="auth-page">
@@ -70,7 +88,7 @@ const ResetPassword = () => {
 
         <h2 className="auth-title">Reset password</h2>
         <p className="auth-subtitle">
-          Enter the code sent to <strong>{emailFromQuery}</strong> and your new password.
+          Enter the code sent to <strong>{destinationLabel}</strong> and your new password.
         </p>
 
         <form onSubmit={handleSubmit} className="auth-form">

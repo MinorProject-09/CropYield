@@ -212,6 +212,17 @@
   cursor: not-allowed;
 }
 
+.auth-btn-outline {
+  background: transparent;
+  color: var(--green-700);
+  border: 2px solid var(--green-500);
+  margin-top: 0.5rem;
+}
+
+.auth-btn-outline:hover:not(:disabled) {
+  background: var(--green-100);
+}
+
 /* ── Spinner ── */
 .auth-spinner {
   display: inline-block;
@@ -404,4 +415,45 @@
 
 .hint-fail {
   color: #9ca3af;
+}
+
+/* ── Auth method tabs (Email / Phone) ── */
+.auth-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  background: var(--gray-100);
+  border-radius: var(--radius);
+}
+
+.auth-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--gray-500);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.auth-tab:hover {
+  color: var(--gray-700);
+}
+
+.auth-tab.active {
+  background: var(--white);
+  color: var(--green-700);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-tab-hint {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  margin: -0.5rem 0 1rem;
+  line-height: 1.4;
 }
