@@ -59,6 +59,7 @@ function Navbar() {
         <div className="space-x-6 hidden md:flex text-sm font-medium">
           <Link to="/" className="hover:text-green-200 transition">Home</Link>
           {user && <Link to="/prediction" className="hover:text-green-200 transition">Prediction</Link>}
+          {user && <Link to="/calendar" className="hover:text-green-200 transition">Calendar</Link>}
           {user && <Link to="/dashboard" className="hover:text-green-200 transition">Dashboard</Link>}
         </div>
 

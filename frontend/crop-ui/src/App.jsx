@@ -7,6 +7,7 @@ import OAuthCallback from "./pages/auth/OAuthCallback"
 import VerifyEmail from "./pages/auth/VerifyEmail"
 import ForgotPassword from "./pages/auth/ForgotPassword"
 import ResetPassword from "./pages/auth/ResetPassword"
+import CropCalendar from "./pages/CropCalendar"
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
@@ -26,6 +27,11 @@ function App() {
           <Route path="/prediction" element={
             <ProtectedRoute>
               <PredictionPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <ProtectedRoute>
+              <CropCalendar />
             </ProtectedRoute>
           } />
           <Route path="/auth/callback" element={<OAuthCallback />} />
