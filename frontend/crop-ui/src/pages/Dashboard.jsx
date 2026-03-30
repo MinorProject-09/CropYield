@@ -6,6 +6,7 @@ import { getPredictionHistory, updateProfile, deletePrediction } from "../api/ap
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { getCropInfo } from "../data/cropInfo";
+import { getMSP, MSP_2024 } from "../data/mspData";
 
 const SOIL_TYPES = ["Sandy", "Loamy", "Clay", "Silt", "Peaty", "Chalky", "Sandy Loam", "Clay Loam", "Other"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -40,6 +41,7 @@ function ConfidenceBar({ value }) {
 const TABS = [
   { id: "overview", label: "Overview" },
   { id: "history",  label: "Prediction History" },
+  { id: "msp",      label: "MSP Prices" },
   { id: "profile",  label: "My Profile" },
 ];
 
@@ -373,6 +375,51 @@ function ProfileTab({ user, setUser }) {
   );
 }
 
+// ── MSP Prices Tab ────────────────────────────────────────────────────────────
+function MSPTab() {
+  const seasons = ["Kharif", "Rabi", "Zaid", "Perennial"];
+  return (
+    <div className="space-y-6">
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 items-start">
+        <span className="text-xl">ℹ️</span>
+        <div>
+          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Government of India — MSP 2024-25</p>
+          <p className="text-xs text-gray-600 leading-relaxed">
+            Minimum Support Price (MSP) is the price at which the government purchases crops from farmers. Announced by CCEA. Prices in ₹ per quintal (100 kg).
+          </p>
+        </div>
+      </div>
+      {seasons.map(season => {
+        const crops = Object.entries(MSP_2024).filter(([, v]) => v.season === season);
+        if (!crops.length) return null;
+        return (
+          <div key={season}>
+            <h3 className="font-semibold text-gray-700 text-sm mb-3 uppercase tracking-wide">{season} Crops</h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {crops.map(([crop, data]) => {
+                const info = getCropInfo(crop);
+                return (
+                  <div key={crop} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3 shadow-sm hover:border-green-200 transition">
+                    <span className="text-2xl">{info?.emoji || "🌾"}</span>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 capitalize text-sm">{crop.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>
+                      <p className="text-xs text-gray-400">{data.season}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-green-700 text-base">₹{data.msp.toLocaleString("en-IN")}</p>
+                      <p className="text-xs text-green-600">{data.change} from last year</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user, setUser } = useAuth();
@@ -453,6 +500,7 @@ export default function Dashboard() {
           {/* Tab content */}
           {activeTab === "overview" && <OverviewTab history={history} historyLoading={historyLoading} />}
           {activeTab === "history"  && <HistoryTab  history={history} loading={historyLoading} onDelete={handleDelete} />}
+          {activeTab === "msp"      && <MSPTab />}
           {activeTab === "profile"  && <ProfileTab  user={user} setUser={setUser} />}
         </div>
       </main>

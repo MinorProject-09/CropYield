@@ -17,6 +17,7 @@ import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
 import { getCropInfo } from "../data/cropInfo";
+import { getMSP } from "../data/mspData";
 import {
   buildStructuredDetailsLine,
   buildStructuredGeocodeQuery,
@@ -105,8 +106,9 @@ export default function PredictionPage() {
   const [potassium,  setPotassium]  = useState("");
 
   /* ── timing ── */
-  const [cropMonth, setCropMonth] = useState("6");
-  const [duration,  setDuration]  = useState("");
+  const [cropMonth,   setCropMonth]   = useState("6");
+  const [duration,    setDuration]    = useState("");
+  const [farmSizeHa,  setFarmSizeHa]  = useState("");
 
   /* ── submission ── */
   const [loading, setLoading] = useState(false);
@@ -343,7 +345,16 @@ export default function PredictionPage() {
 
     setLoading(true);
     try {
-      const { data } = await postMlPrediction({ location: locationPayload, soilPh: ph, nitrogen: n, phosphorus: p, potassium: k, cropMonth: mon, duration: dur });
+      const { data } = await postMlPrediction({
+        location: locationPayload,
+        soilPh: ph,
+        nitrogen: n,
+        phosphorus: p,
+        potassium: k,
+        cropMonth: mon,
+        duration: dur,
+        farmSizeHa: Number(farmSizeHa) > 0 ? Number(farmSizeHa) : 1,
+      });
       setResult(data);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Prediction request failed.";
@@ -620,6 +631,23 @@ export default function PredictionPage() {
                 >
                   <input type="number" step="1" min="1" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="e.g. 90" className={inputClass} />
                 </FieldRow>
+
+                <div className="sm:col-span-2">
+                  <FieldRow
+                    label="Farm Size (hectares)"
+                    hint="Enter your farm area to estimate total production (e.g. 2.5 for 2.5 ha)"
+                  >
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0.01"
+                      value={farmSizeHa}
+                      onChange={(e) => setFarmSizeHa(e.target.value)}
+                      placeholder="e.g. 2.5  (default: 1 ha)"
+                      className={inputClass}
+                    />
+                  </FieldRow>
+                </div>
               </div>
             </section>
 
@@ -650,15 +678,13 @@ export default function PredictionPage() {
               </div>
             ) : (
               <div className="space-y-4">
+
                 {/* ── Recommended crop ── */}
-                <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-6">
-                  <p className="text-xs font-medium uppercase tracking-wider text-green-800">
-                    {t("recommendedCrop")}
-                  </p>
-                  <p className="mt-2 text-4xl font-semibold text-gray-900 capitalize">
+                <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-5">
+                  <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("recommendedCrop")}</p>
+                  <p className="mt-2 text-3xl font-bold text-gray-900 capitalize">
                     {getCropInfo(result.recommendedCrop)?.emoji || "🌾"} {result.recommendedCrop || "—"}
                   </p>
-                  {/* Confidence bar */}
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
                       <span>{t("confidence")}</span>
@@ -673,19 +699,129 @@ export default function PredictionPage() {
                   </div>
                 </div>
 
-              
-                {/* ── Voice read ── */}
-                <VoiceSpeaker
-                  text={resultSpeechText}
-                  label={t("speakResult")}
-                  speechCode={speechCode}
-                />
-
-                {result.id && (
-                  <p className="break-all text-xs text-gray-400">
-                    ID: {String(result.id)}
-                  </p>
+                {/* ── Weather at your location ── */}
+                {result.weather && (
+                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                    <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">🌤 Weather at Your Location</p>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-white rounded-lg p-2.5 border border-blue-100">
+                        <div className="text-xl mb-1">🌡️</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.temperature}°C</div>
+                        <div className="text-xs text-gray-400">Temperature</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-2.5 border border-blue-100">
+                        <div className="text-xl mb-1">💧</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.humidity}%</div>
+                        <div className="text-xs text-gray-400">Humidity</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-2.5 border border-blue-100">
+                        <div className="text-xl mb-1">🌧️</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.rainfall} mm</div>
+                        <div className="text-xs text-gray-400">Avg Monthly Rain</div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Based on ERA5 climate normals for your location.</p>
+                  </div>
                 )}
+
+                {/* ── Yield estimation ── */}
+                {result.yield?.available && (
+                  <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
+                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3">📦 Estimated Yield</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { val: result.yield.yield_q_ha,    unit: "q/ha",    label: "per hectare" },
+                        { val: result.yield.total_yield_q, unit: "quintals",label: `on ${result.yield.farm_size_ha} ha` },
+                        { val: result.yield.yield_kg_ha,   unit: "kg/ha",   label: "per hectare" },
+                        { val: result.yield.total_yield_kg,unit: "kg total",label: `on ${result.yield.farm_size_ha} ha` },
+                      ].map(({ val, unit, label }) => (
+                        <div key={unit} className="bg-white rounded-lg p-2.5 border border-emerald-100 text-center">
+                          <div className="text-base font-bold text-emerald-700">{val}</div>
+                          <div className="text-xs text-gray-500">{unit}</div>
+                          <div className="text-xs text-gray-400">{label}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2 leading-relaxed">{result.yield.note}</p>
+                  </div>
+                )}
+
+                {/* ── MSP Price ── */}
+                {(() => {
+                  const msp = getMSP(result.recommendedCrop);
+                  if (!msp) return null;
+                  return (
+                    <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                      <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">💰 MSP 2024-25 (Govt. Price)</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900">₹{msp.msp.toLocaleString("en-IN")}</p>
+                          <p className="text-xs text-gray-500">per quintal · {msp.season}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-green-600">{msp.change}</p>
+                          <p className="text-xs text-gray-400">vs last year</p>
+                        </div>
+                      </div>
+                      {result.yield?.total_yield_q && (
+                        <div className="mt-2 bg-white rounded-lg p-2.5 border border-amber-100 text-center">
+                          <p className="text-xs text-gray-500 mb-0.5">Estimated Revenue at MSP</p>
+                          <p className="text-lg font-bold text-green-700">
+                            ₹{Math.round(result.yield.total_yield_q * msp.msp).toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* ── Crop growing guide ── */}
+                {(() => {
+                  const info = getCropInfo(result.recommendedCrop);
+                  if (!info) return null;
+                  return (
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-3">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">🌱 Growing Guide</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {[
+                          { label: "Season",    value: info.season },
+                          { label: "Water",     value: info.water },
+                          { label: "Ideal pH",  value: info.ph },
+                          { label: "Duration",  value: `${info.days} days` },
+                        ].map(({ label, value }) => (
+                          <div key={label} className="bg-white rounded-lg p-2 border border-gray-100">
+                            <div className="text-gray-400 font-medium">{label}</div>
+                            <div className="text-gray-800 font-semibold mt-0.5">{value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-600 leading-relaxed bg-white rounded-lg p-2 border border-gray-100">
+                        💡 {info.tip}
+                      </p>
+                    </div>
+                  );
+                })()}
+
+                {/* ── Top 3 alternatives ── */}
+                {result.top3?.length > 1 && (
+                  <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">🔁 Alternatives</p>
+                    <div className="space-y-2">
+                      {result.top3.slice(1).map((alt) => (
+                        <div key={alt.crop} className="flex items-center justify-between text-sm">
+                          <span className="capitalize text-gray-700">
+                            {getCropInfo(alt.crop)?.emoji || "🌾"} {alt.crop}
+                          </span>
+                          <span className="text-xs font-semibold text-gray-500">{Math.round(alt.confidence * 100)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Voice read ── */}
+                <VoiceSpeaker text={resultSpeechText} label={t("speakResult")} speechCode={speechCode} />
+
               </div>
             )}
           </aside>
