@@ -94,6 +94,7 @@ class ProfitRankRequest(BaseModel):
     ph: float
     rainfall: float
     farm_size_ha: float = 1.0
+    duration_days: int = 90   # crop growing duration — affects total production estimate
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
@@ -172,41 +173,24 @@ def predict(data: PredictRequest):
 @app.post("/profit-rank")
 def profit_rank(data: ProfitRankRequest):
     """
-    Rank candidate crops by estimated net profit.
-    Always returns top-4 by expanding beyond the ML top-3:
-    - Uses ML candidates first (with their confidence scores)
-    - Fills remaining slots from all known crops in the profit engine
+    Rank ONLY the ML-recommended candidates by estimated net profit.
+    Results are specific to this prediction's soil/climate/farm inputs.
+    Does NOT expand to all known crops — only the ML top-3 are ranked.
     """
     if rank_crops is None:
         raise HTTPException(status_code=503, detail="Profit engine not available")
 
     try:
-        from profit_engine import HISTORICAL_MSP  # all known crops
         farm_size = max(0.01, float(data.farm_size_ha))
 
-        # Build a set of ML candidates (with real confidence)
-        ml_crops = {}
-        for c in data.candidates:
-            name = str(c.get("crop", "")).strip().lower()
-            if name:
-                ml_crops[name] = float(c.get("confidence", 0.5))
-
-        # Expand: add all known crops not already in ML candidates, with low confidence
-        all_known = list(HISTORICAL_MSP.keys())
-        extra_crops = [k for k in all_known if k not in ml_crops]
-
-        # Build full candidate list: ML crops first, then extras
-        all_candidates = []
-        for name, conf in ml_crops.items():
-            all_candidates.append({"crop": name, "confidence": conf})
-        for name in extra_crops:
-            all_candidates.append({"crop": name, "confidence": 0.1})
-
         enriched = []
-        for c in all_candidates:
-            crop_name  = c["crop"]
-            confidence = c["confidence"]
+        for c in data.candidates:
+            crop_name  = str(c.get("crop", "")).strip().lower()
+            confidence = float(c.get("confidence", 0.5))
+            if not crop_name:
+                continue
 
+            # Try yield model first — it uses actual soil/climate inputs
             yield_q_ha = None
             if yield_model is not None and yield_encoder is not None and yield_scaler is not None:
                 try:
@@ -218,6 +202,7 @@ def profit_rank(data: ProfitRankRequest):
                         yield_q_ha = max(0.0, round(float(yield_model.predict(yield_scaler.transform(yf))[0]), 2))
                 except Exception:
                     pass
+            # If no yield model, profit_engine will use suitability-adjusted baseline
 
             enriched.append({
                 "crop":       crop_name,
@@ -225,8 +210,22 @@ def profit_rank(data: ProfitRankRequest):
                 "yield_q_ha": yield_q_ha,
             })
 
-        ranked = rank_crops(enriched, farm_size_ha=farm_size, top_n=4)
+        if not enriched:
+            raise HTTPException(status_code=400, detail="No valid candidates provided")
+
+        ranked = rank_crops(
+            enriched,
+            farm_size_ha=farm_size,
+            top_n=len(enriched),   # rank all candidates, not just top-4
+            duration_days=int(data.duration_days),
+            N=data.N, P=data.P, K=data.K,
+            ph=data.ph,
+            temperature=data.temperature,
+            rainfall=data.rainfall,
+        )
         return {"ranked": ranked, "farm_size_ha": farm_size}
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

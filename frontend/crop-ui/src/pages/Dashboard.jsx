@@ -257,6 +257,7 @@ function HistoryTab({ history, loading, onDelete }) {
                     },
                     top3:            p.top3?.length ? p.top3 : [{ crop: p.recommendedCrop, confidence: p.confidence }],
                     farmSizeHa:      p.farmSizeHa || 1,
+                    duration:        p.duration || 90,
                     recommendedCrop: p.recommendedCrop,
                     fromHistory:     true,
                     predictionDate:  p.createdAt,

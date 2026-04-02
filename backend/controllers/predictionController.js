@@ -267,7 +267,7 @@ exports.deletePrediction = async (req, res) => {
 
 exports.getProfitRank = async (req, res) => {
   try {
-    const { candidates, N, P, K, temperature, humidity, ph, rainfall, farm_size_ha } = req.body;
+    const { candidates, N, P, K, temperature, humidity, ph, rainfall, farm_size_ha, duration_days } = req.body;
 
     if (!Array.isArray(candidates) || candidates.length === 0) {
       return res.status(400).json({ message: "candidates array is required" });
@@ -285,6 +285,7 @@ exports.getProfitRank = async (req, res) => {
       ph: Number(ph),
       rainfall: Number(rainfall),
       farm_size_ha: Number(farm_size_ha) > 0 ? Number(farm_size_ha) : 1.0,
+      duration_days: Number(duration_days) > 0 ? Math.round(Number(duration_days)) : 90,
     };
 
     const resp = await fetchJsonWithTimeout(

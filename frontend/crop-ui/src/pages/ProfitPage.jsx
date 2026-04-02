@@ -66,12 +66,37 @@ function CropRow({ item, rank, t, onLearnMore }) {
           </div>
         </td>
 
-        {/* Yield */}
+        {/* Soil fit / suitability */}
+        <td className="px-3 py-4 text-center">
+          {(() => {
+            const pct = Math.round((item.suitability_score || 0) * 100);
+            const color = pct >= 80 ? "text-green-700 dark:text-green-400"
+                        : pct >= 60 ? "text-amber-600 dark:text-amber-400"
+                        : "text-red-500";
+            const bar   = pct >= 80 ? "bg-green-500" : pct >= 60 ? "bg-amber-400" : "bg-red-400";
+            return (
+              <>
+                <div className={`font-bold text-sm ${color}`}>{pct}%</div>
+                <div className="w-full h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full mt-1 overflow-hidden">
+                  <div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} />
+                </div>
+              </>
+            );
+          })()}
+        </td>
+
+        {/* Yield per ha */}
         <td className="px-3 py-4 text-center">
           <div className="font-semibold text-gray-800 dark:text-slate-200 text-sm">{item.yield_q_ha}</div>
           <div className="text-xs text-gray-400">{t("q/ha")}</div>
         </td>
 
+        {/* Total production on farm */}
+        <td className="px-3 py-4 text-center">
+          <div className="font-semibold text-emerald-700 dark:text-emerald-400 text-sm">{item.total_yield_q ?? "—"}</div>
+          <div className="text-xs text-gray-400">{t("quintals total")}</div>
+          <div className="text-xs text-gray-400">{item.total_yield_kg ? `${item.total_yield_kg} kg` : ""}</div>
+        </td>
         {/* Total expenditure */}
         <td className="px-3 py-4 text-center">
           <div className="font-semibold text-red-600 dark:text-red-400 text-sm">{inr(item.total_cost)}</div>
@@ -131,7 +156,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
       {/* Cost breakdown sub-row */}
       {showCost && (
         <tr className="bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700">
-          <td colSpan={10} className="px-6 py-3">
+          <td colSpan={12} className="px-6 py-3">
             <div className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-2 uppercase tracking-wide">
               💸 {t("Expenditure breakdown for")} {item.crop} ({item.farm_size_ha} {t("ha")})
             </div>
@@ -213,7 +238,7 @@ export default function ProfitPage() {
   const navigate = useNavigate();
 
   // Data passed from PredictionPage or Dashboard history via router state
-  const { mlInput, top3, farmSizeHa, recommendedCrop, fromHistory, predictionDate } = location.state || {};
+  const { mlInput, top3, farmSizeHa, recommendedCrop, fromHistory, predictionDate, duration } = location.state || {};
 
   const [ranked,  setRanked]  = useState(null);
   const [loading, setLoading] = useState(false);
@@ -227,15 +252,16 @@ export default function ProfitPage() {
     setError(null);
 
     getProfitRank({
-      candidates:  top3.map(c => ({ crop: c.crop, confidence: c.confidence })),
-      N:           mlInput.N,
-      P:           mlInput.P,
-      K:           mlInput.K,
-      temperature: mlInput.temperature,
-      humidity:    mlInput.humidity,
-      ph:          mlInput.ph,
-      rainfall:    mlInput.rainfall,
+      candidates:   top3.map(c => ({ crop: c.crop, confidence: c.confidence })),
+      N:            mlInput.N,
+      P:            mlInput.P,
+      K:            mlInput.K,
+      temperature:  mlInput.temperature,
+      humidity:     mlInput.humidity,
+      ph:           mlInput.ph,
+      rainfall:     mlInput.rainfall,
       farm_size_ha: farmSizeHa || mlInput.farm_size_ha || 1,
+      duration_days: duration || 90,
     })
       .then(({ data }) => setRanked(data.ranked || []))
       .catch(err => setError(err.response?.data?.detail || err.response?.data?.message || err.message || "Failed"))
@@ -304,7 +330,7 @@ export default function ProfitPage() {
           <span className="text-xl flex-shrink-0">ℹ️</span>
           <div className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
             <strong>{t("How to read this table:")}</strong>{" "}
-            {t("Each row is one crop. 'Expenditure' is what you spend to grow it. 'Profit' is what you earn after spending. Green means profit, red means loss. 'Return %' shows how much you earn for every ₹100 spent.")}
+            {t("Each row is one crop. 'Soil Fit' shows how well your soil and weather match that crop — higher is better. 'Expenditure' is what you spend to grow it. 'Profit' is what you earn after spending. Green means profit, red means loss. 'Return %' shows how much you earn for every ₹100 spent.")}
           </div>
         </div>
 
@@ -342,6 +368,7 @@ export default function ProfitPage() {
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       {[
+                        { label: t("Soil Fit"),     value: `${Math.round((item.suitability_score||0)*100)}%`, color: item.suitability_score >= 0.8 ? "text-green-700 dark:text-green-400" : item.suitability_score >= 0.6 ? "text-amber-600" : "text-red-500" },
                         { label: t("Expenditure"),  value: inr(item.total_cost),       color: "text-red-600 dark:text-red-400" },
                         { label: t("Return %"),      value: `${item.roi_pct}%`,          color: item.roi_pct >= 0 ? "text-green-700 dark:text-green-400" : "text-red-500" },
                         { label: t("Last year"),     value: inr(item.profit_prev),       color: item.profit_prev >= 0 ? "text-gray-700 dark:text-slate-200" : "text-red-500" },
@@ -375,7 +402,9 @@ export default function ProfitPage() {
                   <tr className="bg-green-700 text-white text-xs uppercase tracking-wide">
                     <th className="px-3 py-3 text-center">{t("Rank")}</th>
                     <th className="px-3 py-3 text-left">{t("Crop")}</th>
-                    <th className="px-3 py-3 text-center">{t("Yield")}</th>
+                    <th className="px-3 py-3 text-center">{t("Soil Fit")}</th>
+                    <th className="px-3 py-3 text-center">{t("Yield/ha")}</th>
+                    <th className="px-3 py-3 text-center">{t("Total Production")}</th>
                     <th className="px-3 py-3 text-center">{t("Expenditure")}</th>
                     <th className="px-3 py-3 text-center">{t("Last Year Profit")}</th>
                     <th className="px-3 py-3 text-center">{t("This Year Profit")}</th>
