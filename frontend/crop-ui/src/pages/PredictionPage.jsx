@@ -857,6 +857,7 @@ export default function PredictionPage() {
                         top3:            result.top3,
                         farmSizeHa:      result.yield?.farm_size_ha || 1,
                         recommendedCrop: result.recommendedCrop,
+                        duration:        Number(duration) || 90,
                       }
                     })}
                     className="w-full flex items-center justify-center gap-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 text-sm transition shadow-md"
