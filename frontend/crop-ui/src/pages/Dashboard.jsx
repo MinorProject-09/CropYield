@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../i18n/LanguageContext";
 import { getPredictionHistory, updateProfile, deletePrediction } from "../api/api";
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
@@ -39,14 +40,15 @@ function ConfidenceBar({ value }) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "history",  label: "Prediction History" },
-  { id: "msp",      label: "MSP Prices" },
-  { id: "profile",  label: "My Profile" },
+  { id: "overview", labelKey: "Overview" },
+  { id: "history",  labelKey: "Prediction History" },
+  { id: "msp",      labelKey: "MSP Prices" },
+  { id: "profile",  labelKey: "My Profile" },
 ];
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 function OverviewTab({ history, historyLoading }) {
+  const { t } = useLanguage();
   const tips = [
     { icon: "💧", tip: "Check soil moisture before sowing — over-watering reduces yield by up to 20%." },
     { icon: "🌡️", tip: "Soil temperature above 15°C is ideal for most Kharif crops." },
@@ -66,19 +68,19 @@ function OverviewTab({ history, historyLoading }) {
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
         <span className="text-2xl">{tip.icon}</span>
         <div>
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Farming Tip of the Day</p>
-          <p className="text-gray-700 text-sm leading-relaxed">{tip.tip}</p>
+          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">{t("Farming Tip of the Day")}</p>
+          <p className="text-gray-700 text-sm leading-relaxed">{t(tip.tip)}</p>
         </div>
       </div>
 
       {/* Last prediction */}
       {historyLoading ? (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-400 text-sm">Loading history…</div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-400 text-sm">{t("Loading history…")}</div>
       ) : lastPrediction ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Last Prediction</h3>
-            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">New prediction →</Link>
+            <h3 className="font-semibold text-gray-900">{t("Last Prediction")}</h3>
+            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">{t("New prediction →")}</Link>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-4xl">{getCropInfo(lastPrediction.recommendedCrop)?.emoji || "🌾"}</div>
@@ -95,10 +97,10 @@ function OverviewTab({ history, historyLoading }) {
       ) : (
         <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center">
           <p className="text-3xl mb-2">🌱</p>
-          <p className="text-gray-500 text-sm mb-4">No predictions yet. Run your first one!</p>
+          <p className="text-gray-500 text-sm mb-4">{t("No predictions yet. Run your first one!")}</p>
           <Link to="/prediction">
             <button className="bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-green-800 transition">
-              Start Prediction →
+              {t("Start Prediction →")}
             </button>
           </Link>
         </div>
@@ -109,6 +111,8 @@ function OverviewTab({ history, historyLoading }) {
 
 // ── History Tab ───────────────────────────────────────────────────────────────
 function HistoryTab({ history, loading, onDelete }) {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
   const [deleting, setDeleting] = useState(null);
 
   const handleDelete = async (id) => {
@@ -160,10 +164,10 @@ function HistoryTab({ history, loading, onDelete }) {
     return (
       <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center">
         <p className="text-4xl mb-3">📋</p>
-        <p className="text-gray-500 text-sm mb-4">No prediction history yet.</p>
+        <p className="text-gray-500 text-sm mb-4">{t("No prediction history yet.")}</p>
         <Link to="/prediction">
           <button className="bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-green-800 transition">
-            Make Your First Prediction →
+            {t("Make Your First Prediction →")}
           </button>
         </Link>
       </div>
@@ -178,7 +182,7 @@ function HistoryTab({ history, loading, onDelete }) {
           onClick={exportCSV}
           className="flex items-center gap-2 text-xs font-semibold text-green-700 border border-green-200 bg-white px-4 py-2 rounded-xl hover:bg-green-50 transition"
         >
-          ⬇ Export CSV
+          ⬇ {t("Export CSV")}
         </button>
       </div>
 
@@ -186,29 +190,42 @@ function HistoryTab({ history, loading, onDelete }) {
         const month = MONTHS[(p.cropMonth || 1) - 1];
         const location = p.location?.details || (p.location?.latitude ? `${Number(p.location.latitude).toFixed(2)}°, ${Number(p.location.longitude).toFixed(2)}°` : "—");
         const info = getCropInfo(p.recommendedCrop);
+
+        // Build mlInput from stored fields for profit page navigation
+        const mlInput = (p.nitrogen != null && p.temperature != null) ? {
+          N:           p.nitrogen,
+          P:           p.phosphorus,
+          K:           p.potassium,
+          temperature: p.temperature,
+          humidity:    p.humidity,
+          ph:          p.soilPh,
+          rainfall:    p.rainfall,
+          farm_size_ha: p.farmSizeHa || 1,
+        } : null;
+
         return (
-          <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-green-200 transition">
+          <div key={p._id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:border-green-200 dark:hover:border-green-700 transition">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
                 {info?.emoji || "🌾"}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="font-semibold text-gray-900 capitalize">{p.recommendedCrop}</span>
+                  <span className="font-semibold text-gray-900 dark:text-slate-100 capitalize">{p.recommendedCrop}</span>
                   <Badge color={p.confidence >= 0.75 ? "green" : p.confidence >= 0.5 ? "amber" : "blue"}>
-                    {Math.round(p.confidence * 100)}% confidence
+                    {Math.round(p.confidence * 100)}% {t("confidence")}
                   </Badge>
                   {info?.season && <Badge color="blue">{info.season}</Badge>}
                 </div>
                 <ConfidenceBar value={p.confidence} />
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-500 dark:text-slate-400">
                   <span>📍 {location}</span>
                   <span>📅 {month} · {p.duration}d</span>
                   <span>🧪 pH {p.soilPh} · N{p.nitrogen} P{p.phosphorus} K{p.potassium}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <div className="text-xs text-gray-400 text-right">
+                <div className="text-xs text-gray-400 dark:text-slate-500 text-right">
                   {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                   <br />
                   {new Date(p.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
@@ -222,6 +239,33 @@ function HistoryTab({ history, loading, onDelete }) {
                   {deleting === p._id ? "…" : "🗑"}
                 </button>
               </div>
+            </div>
+
+            {/* Profit analysis button */}
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => navigate("/profit", {
+                  state: {
+                    mlInput:         mlInput || {
+                      N: p.nitrogen, P: p.phosphorus, K: p.potassium,
+                      temperature: p.temperature || 25,
+                      humidity:    p.humidity    || 70,
+                      ph:          p.soilPh,
+                      rainfall:    p.rainfall    || 100,
+                      farm_size_ha: p.farmSizeHa || 1,
+                    },
+                    top3:            p.top3?.length ? p.top3 : [{ crop: p.recommendedCrop, confidence: p.confidence }],
+                    farmSizeHa:      p.farmSizeHa || 1,
+                    recommendedCrop: p.recommendedCrop,
+                    fromHistory:     true,
+                    predictionDate:  p.createdAt,
+                  }
+                })}
+                className="w-full flex items-center justify-center gap-2 text-xs font-semibold text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 rounded-xl py-2 transition"
+              >
+                📊 {t("View Profit Analysis")}
+              </button>
             </div>
           </div>
         );
@@ -423,6 +467,7 @@ function MSPTab() {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -450,25 +495,25 @@ export default function Dashboard() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 dark:bg-slate-900">
 
         {/* Hero */}
         <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
           <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p className="text-green-300 text-sm mb-1">Dashboard</p>
+              <p className="text-green-300 text-sm mb-1">{t("Dashboard")}</p>
               <h1 className="text-2xl md:text-3xl font-bold">
-                Welcome back, {user?.name?.split(" ")[0] || "Farmer"} 👋
+                {t("Welcome back")}, {user?.name?.split(" ")[0] || t("Farmer")} 👋
               </h1>
               <p className="text-green-200 text-sm mt-1">
                 {history.length > 0
-                  ? `You have ${history.length} prediction${history.length > 1 ? "s" : ""} so far.`
-                  : "Run your first prediction to get started."}
+                  ? t(`You have ${history.length} prediction${history.length > 1 ? "s" : ""} so far.`)
+                  : t("Run your first prediction to get started.")}
               </p>
             </div>
             <Link to="/prediction">
               <button className="bg-white text-green-800 font-bold px-5 py-2.5 rounded-xl hover:bg-green-50 transition shadow text-sm">
-                🌾 New Prediction →
+                🌾 {t("New Prediction →")}
               </button>
             </Link>
           </div>
@@ -487,7 +532,7 @@ export default function Dashboard() {
                     : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
                 {tab.id === "history" && history.length > 0 && (
                   <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === "history" ? "bg-white/20 text-white" : "bg-green-100 text-green-700"}`}>
                     {history.length}

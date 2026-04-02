@@ -17,6 +17,10 @@ export function postMlPrediction(payload) {
   return api.post("/api/ml/prediction", payload);
 }
 
+export function getProfitRank(payload) {
+  return api.post("/api/ml/prediction/profit-rank", payload);
+}
+
 export function getPredictionHistory() {
   return api.get("/api/ml/prediction/history");
 }

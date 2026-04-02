@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useSearchParams, Navigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 import OAuthButtons from "./OAuthButtons";
 import "./auth.css";
 
@@ -9,6 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login, user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -66,53 +68,32 @@ const Login = () => {
           <h1 className="auth-brand-name">CropYield</h1>
         </div>
 
-        <h2 className="auth-title">Welcome back</h2>
-        <p className="auth-subtitle">Sign in to your farming dashboard</p>
+        <h2 className="auth-title">{t("Welcome back")}</h2>
+        <p className="auth-subtitle">{t("Sign in to your farming dashboard")}</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
+            <label htmlFor="email">{t("Email")}</label>
+            <input id="email" type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
           </div>
-
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+            <label htmlFor="password">{t("Password")}</label>
+            <input id="password" type="password" name="password" placeholder="••••••••" value={form.password} onChange={handleChange} required />
             <div style={{ textAlign: "right", marginTop: "0.25rem" }}>
-              <Link to="/forgot-password" className="auth-link-small">
-                Forgot password?
-              </Link>
+              <Link to="/forgot-password" className="auth-link-small">{t("Forgot password?")}</Link>
             </div>
           </div>
-
           {error && <p className="auth-error">⚠ {error}</p>}
           {info && <p className="auth-info">✓ {info}</p>}
-
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? <span className="auth-spinner" /> : "Login"}
+            {loading ? <span className="auth-spinner" /> : t("Login")}
           </button>
         </form>
 
         <OAuthButtons mode="login" />
 
         <p className="auth-footer">
-          Don't have an account? <Link to="/signup">Sign Up</Link>
+          {t("Don't have an account?")} <Link to="/signup">{t("Sign Up")}</Link>
         </p>
       </div>
     </div>

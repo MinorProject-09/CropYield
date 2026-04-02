@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage"
 import PredictionPage from "./pages/PredictionPage"
+import ProfitPage from "./pages/ProfitPage"
 import Login from "./pages/auth/Login"
 import SignUp from "./pages/auth/SignUp"
 import OAuthCallback from "./pages/auth/OAuthCallback"
@@ -32,6 +33,11 @@ function App() {
           <Route path="/calendar" element={
             <ProtectedRoute>
               <CropCalendar />
+            </ProtectedRoute>
+          } />
+          <Route path="/profit" element={
+            <ProtectedRoute>
+              <ProfitPage />
             </ProtectedRoute>
           } />
           <Route path="/auth/callback" element={<OAuthCallback />} />

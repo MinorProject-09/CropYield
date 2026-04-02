@@ -1,21 +1,32 @@
 """
 app.py — CropYield AI ML Service
 =================================
-FastAPI service exposing /predict for crop recommendation + yield estimation.
-
-Feature order sent to the crop model MUST match train.py:
-  ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
+FastAPI service exposing:
+  POST /predict       — crop recommendation + yield estimation
+  POST /profit-rank   — rank candidates by net profit analysis
 """
+
+import sys
+from pathlib import Path
+
+# Add model directory to path so profit_engine can be imported
+MODEL_DIR = (Path(__file__).resolve().parent.parent / "model").resolve()
+sys.path.insert(0, str(MODEL_DIR))
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pickle
 import numpy as np
-from pathlib import Path
+
+# Import profit engine (lives in ml-service/model/profit_engine.py)
+try:
+    from profit_engine import rank_crops
+    print("✅ Profit engine loaded")
+except ImportError as e:
+    print(f"⚠️  Profit engine import failed: {e}")
+    rank_crops = None
 
 app = FastAPI()
-
-MODEL_DIR = (Path(__file__).resolve().parent.parent / "model").resolve()
 
 # ── Feature order — must match train.py exactly ───────────────────────────────
 CROP_FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
@@ -30,7 +41,6 @@ if not CROP_MODEL_PATH.exists():
 with open(CROP_MODEL_PATH, "rb") as f:
     crop_model = pickle.load(f)
 
-# Validate feature order matches what the model was trained on
 if hasattr(crop_model, "feature_names_in_"):
     trained_features = list(crop_model.feature_names_in_)
     if trained_features != CROP_FEATURES:
@@ -62,27 +72,38 @@ else:
     print("⚠️  Yield model not found — run: python train_yield.py")
 
 
-# ── Request schema ────────────────────────────────────────────────────────────
+# ── Request schemas ───────────────────────────────────────────────────────────
 class PredictRequest(BaseModel):
-    # Soil nutrients
     N: float
     P: float
     K: float
-    # Climate (fetched from Open-Meteo by the backend)
     temperature: float
     humidity: float
     ph: float
     rainfall: float
-    # Optional — used for yield estimation
     farm_size_ha: float = 1.0
 
 
+class ProfitRankRequest(BaseModel):
+    candidates: list        # [{"crop": str, "confidence": float}]
+    N: float
+    P: float
+    K: float
+    temperature: float
+    humidity: float
+    ph: float
+    rainfall: float
+    farm_size_ha: float = 1.0
+
+
+# ── Routes ────────────────────────────────────────────────────────────────────
 @app.get("/")
 def home():
     return {
         "message": "CropYield ML Service Running",
         "crop_model_loaded": True,
         "yield_model_loaded": yield_model is not None,
+        "profit_engine_loaded": rank_crops is not None,
         "crops": list(crop_model.classes_),
     }
 
@@ -90,51 +111,37 @@ def home():
 @app.post("/predict")
 def predict(data: PredictRequest):
     try:
-        # ── Build feature array in the EXACT order the model was trained on ──
         features = np.array([[
-            data.N,
-            data.P,
-            data.K,
-            data.temperature,
-            data.humidity,
-            data.ph,
-            data.rainfall,
+            data.N, data.P, data.K,
+            data.temperature, data.humidity,
+            data.ph, data.rainfall,
         ]])
 
         if not hasattr(crop_model, "predict_proba"):
             raise RuntimeError("Model does not support predict_proba()")
 
-        proba    = crop_model.predict_proba(features)[0]
-        best_idx = int(np.argmax(proba))
-        crop     = str(crop_model.classes_[best_idx])
+        proba      = crop_model.predict_proba(features)[0]
+        best_idx   = int(np.argmax(proba))
+        crop       = str(crop_model.classes_[best_idx])
         confidence = float(proba[best_idx])
 
-        # ── Top-3 alternatives ────────────────────────────────────────────────
-        top3_idx  = np.argsort(proba)[::-1][:3]
+        top3_idx = np.argsort(proba)[::-1][:3]
         top3 = [
             {"crop": str(crop_model.classes_[i]), "confidence": round(float(proba[i]), 4)}
             for i in top3_idx
         ]
 
-        # ── Yield estimation ──────────────────────────────────────────────────
         yield_data = {"available": False}
-
         if yield_model is not None and yield_encoder is not None and yield_scaler is not None:
             try:
                 if crop in yield_encoder.classes_:
-                    crop_enc = int(yield_encoder.transform([crop])[0])
-                    yf = np.array([[
-                        crop_enc,
-                        data.N, data.P, data.K,
-                        data.temperature, data.humidity,
-                        data.ph, data.rainfall,
-                    ]])
-                    yf_s      = yield_scaler.transform(yf)
-                    raw_yield = float(yield_model.predict(yf_s)[0])
-                    raw_yield = max(0.0, round(raw_yield, 2))
-
-                    farm_size     = max(0.01, float(data.farm_size_ha))
-                    total_q       = round(raw_yield * farm_size, 2)
+                    crop_enc  = int(yield_encoder.transform([crop])[0])
+                    yf        = np.array([[crop_enc, data.N, data.P, data.K,
+                                           data.temperature, data.humidity,
+                                           data.ph, data.rainfall]])
+                    raw_yield = max(0.0, round(float(yield_model.predict(yield_scaler.transform(yf))[0]), 2))
+                    farm_size = max(0.01, float(data.farm_size_ha))
+                    total_q   = round(raw_yield * farm_size, 2)
                     yield_data = {
                         "available":      True,
                         "yield_q_ha":     raw_yield,
@@ -157,6 +164,69 @@ def predict(data: PredictRequest):
             "top3":       top3,
             "yield":      yield_data,
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/profit-rank")
+def profit_rank(data: ProfitRankRequest):
+    """
+    Rank candidate crops by estimated net profit.
+    Always returns top-4 by expanding beyond the ML top-3:
+    - Uses ML candidates first (with their confidence scores)
+    - Fills remaining slots from all known crops in the profit engine
+    """
+    if rank_crops is None:
+        raise HTTPException(status_code=503, detail="Profit engine not available")
+
+    try:
+        from profit_engine import HISTORICAL_MSP  # all known crops
+        farm_size = max(0.01, float(data.farm_size_ha))
+
+        # Build a set of ML candidates (with real confidence)
+        ml_crops = {}
+        for c in data.candidates:
+            name = str(c.get("crop", "")).strip().lower()
+            if name:
+                ml_crops[name] = float(c.get("confidence", 0.5))
+
+        # Expand: add all known crops not already in ML candidates, with low confidence
+        all_known = list(HISTORICAL_MSP.keys())
+        extra_crops = [k for k in all_known if k not in ml_crops]
+
+        # Build full candidate list: ML crops first, then extras
+        all_candidates = []
+        for name, conf in ml_crops.items():
+            all_candidates.append({"crop": name, "confidence": conf})
+        for name in extra_crops:
+            all_candidates.append({"crop": name, "confidence": 0.1})
+
+        enriched = []
+        for c in all_candidates:
+            crop_name  = c["crop"]
+            confidence = c["confidence"]
+
+            yield_q_ha = None
+            if yield_model is not None and yield_encoder is not None and yield_scaler is not None:
+                try:
+                    if crop_name in yield_encoder.classes_:
+                        crop_enc   = int(yield_encoder.transform([crop_name])[0])
+                        yf         = np.array([[crop_enc, data.N, data.P, data.K,
+                                                data.temperature, data.humidity,
+                                                data.ph, data.rainfall]])
+                        yield_q_ha = max(0.0, round(float(yield_model.predict(yield_scaler.transform(yf))[0]), 2))
+                except Exception:
+                    pass
+
+            enriched.append({
+                "crop":       crop_name,
+                "confidence": confidence,
+                "yield_q_ha": yield_q_ha,
+            })
+
+        ranked = rank_crops(enriched, farm_size_ha=farm_size, top_n=4)
+        return {"ranked": ranked, "farm_size_ha": farm_size}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

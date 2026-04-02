@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, Navigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../i18n/LanguageContext";
 import OAuthButtons from "./OAuthButtons";
 import "./auth.css";
 
@@ -41,6 +42,7 @@ const PasswordHints = ({ password }) => {
 const SignUp = () => {
   const navigate = useNavigate();
   const { login, user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     name: "",
@@ -101,61 +103,33 @@ const SignUp = () => {
           <h1 className="auth-brand-name">CropYield</h1>
         </div>
 
-        <h2 className="auth-title">Create your account</h2>
-        <p className="auth-subtitle">Start optimizing your harvest today</p>
+        <h2 className="auth-title">{t("Create your account")}</h2>
+        <p className="auth-subtitle">{t("Start optimizing your harvest today")}</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              name="name"
-              placeholder="John Farmer"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
+            <label htmlFor="name">{t("Full Name")}</label>
+            <input id="name" name="name" placeholder="John Farmer" value={form.name} onChange={handleChange} required />
           </div>
-
           <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
+            <label htmlFor="email">{t("Email")}</label>
+            <input id="email" type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
           </div>
-
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              placeholder="Min_8_Chars_1Upper"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+            <label htmlFor="password">{t("Password")}</label>
+            <input id="password" type="password" name="password" placeholder="Min_8_Chars_1Upper" value={form.password} onChange={handleChange} required />
             <PasswordHints password={form.password} />
           </div>
-
           {error && <p className="auth-error">⚠ {error}</p>}
-
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? <span className="auth-spinner" /> : "Create Account"}
+            {loading ? <span className="auth-spinner" /> : t("Create Account")}
           </button>
         </form>
 
         <OAuthButtons mode="signup" />
 
         <p className="auth-footer">
-          Already have an account?{" "}
-          <Link to="/login">Login</Link>
+          {t("Already have an account?")} <Link to="/login">{t("Login")}</Link>
         </p>
       </div>
     </div>

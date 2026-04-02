@@ -1,4 +1,5 @@
 import Navbar from "../components/Navbar";
+import { useLanguage } from "../i18n/LanguageContext";
 
 const CALENDAR = [
   { crop: "Rice",        emoji: "🌾", sow: "Jun–Jul",  harvest: "Oct–Nov", season: "Kharif",   duration: "90–150d", water: "High",   tip: "Transplant 25 days after nursery sowing." },
@@ -39,23 +40,23 @@ const WATER_COLORS = {
 };
 
 export default function CropCalendar() {
+  const { t } = useLanguage();
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 dark:bg-slate-900">
         <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
           <div className="max-w-5xl mx-auto">
-            <p className="text-green-300 text-sm mb-1">📅 Seasonal Guide</p>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">Crop Calendar</h1>
-            <p className="text-green-200 text-sm">Sowing and harvesting schedule for all 22 supported crops.</p>
+            <p className="text-green-300 text-sm mb-1">📅 {t("Seasonal Guide")}</p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">{t("Crop Calendar")}</h1>
+            <p className="text-green-200 text-sm">{t("Sowing and harvesting schedule for all 22 supported crops.")}</p>
           </div>
         </div>
 
         <div className="max-w-5xl mx-auto px-6 py-8">
-          {/* Season legend */}
           <div className="flex flex-wrap gap-3 mb-6">
             {Object.entries(SEASON_COLORS).map(([s, cls]) => (
-              <span key={s} className={`text-xs font-semibold px-3 py-1 rounded-full border ${cls}`}>{s}</span>
+              <span key={s} className={`text-xs font-semibold px-3 py-1 rounded-full border ${cls}`}>{t(s)}</span>
             ))}
           </div>
 
@@ -66,28 +67,28 @@ export default function CropCalendar() {
                   <div className="text-3xl flex-shrink-0">{c.emoji}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <span className="font-semibold text-gray-900">{c.crop}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${SEASON_COLORS[c.season]}`}>{c.season}</span>
+                      <span className="font-semibold text-gray-900">{t(c.crop)}</span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${SEASON_COLORS[c.season]}`}>{t(c.season)}</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-2">
                       <div className="bg-green-50 rounded-lg p-2">
-                        <div className="text-gray-400 font-medium mb-0.5">🌱 Sow</div>
+                        <div className="text-gray-400 font-medium mb-0.5">🌱 {t("Sow")}</div>
                         <div className="font-semibold text-gray-800">{c.sow}</div>
                       </div>
                       <div className="bg-amber-50 rounded-lg p-2">
-                        <div className="text-gray-400 font-medium mb-0.5">🌾 Harvest</div>
+                        <div className="text-gray-400 font-medium mb-0.5">🌾 {t("Harvest")}</div>
                         <div className="font-semibold text-gray-800">{c.harvest}</div>
                       </div>
                       <div className="bg-blue-50 rounded-lg p-2">
-                        <div className="text-gray-400 font-medium mb-0.5">⏱ Duration</div>
+                        <div className="text-gray-400 font-medium mb-0.5">⏱ {t("Duration")}</div>
                         <div className="font-semibold text-gray-800">{c.duration}</div>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-2">
-                        <div className="text-gray-400 font-medium mb-0.5">💧 Water</div>
-                        <div className={`font-semibold ${WATER_COLORS[c.water]}`}>{c.water}</div>
+                        <div className="text-gray-400 font-medium mb-0.5">💧 {t("Water")}</div>
+                        <div className={`font-semibold ${WATER_COLORS[c.water]}`}>{t(c.water)}</div>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">💡 {c.tip}</p>
+                    <p className="text-xs text-gray-500 leading-relaxed">💡 {t(c.tip)}</p>
                   </div>
                 </div>
               </div>
