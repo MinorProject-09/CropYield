@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HiOutlineBeaker,
   HiOutlineCalendarDays,
@@ -9,7 +9,6 @@ import {
 } from "react-icons/hi2";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import VoiceInput from "../components/VoiceInput";
 import VoiceSpeaker from "../components/VoiceSpeaker";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -80,6 +79,7 @@ async function checkGeoPermission() {
 
 export default function PredictionPage() {
   const { t, speechCode } = useLanguage();
+  const navigate = useNavigate();
 
   /* ── location ── */
   const [locationMode,   setLocationMode]   = useState("map");
@@ -202,7 +202,7 @@ export default function PredictionPage() {
     checkGeoPermission().then((state) => {
       if (state === "denied") {
         setGeoStatus("denied");
-        setError(t("geoDenied"));
+        setError(t("🔒 Location blocked. Click the lock icon in the address bar → Site settings → Location → Allow, then refresh."));
         return;
       }
       setGeoStatus("requesting");
@@ -215,7 +215,7 @@ export default function PredictionPage() {
         },
         (err) => {
           setGeoStatus(err.code === 1 ? "denied" : "idle");
-          setError(t("geoDenied"));
+          setError(t("🔒 Location blocked. Click the lock icon in the address bar → Site settings → Location → Allow, then refresh."));
         },
         { enableHighAccuracy: true, timeout: 12000 }
       );
@@ -366,9 +366,9 @@ export default function PredictionPage() {
 
   /* ── geo banner ──────────────────────────────────────────────────── */
   const geoBannerText =
-    geoStatus === "requesting"  ? t("geoRequesting") :
-    geoStatus === "granted"     ? t("geoGranted")    :
-    geoStatus === "denied"      ? t("geoDenied")     :
+    geoStatus === "requesting"  ? t("📡 Detecting your location…") :
+    geoStatus === "granted"     ? t("📍 Location detected — coordinates set automatically.") :
+    geoStatus === "denied"      ? t("🔒 Location blocked. Click the lock icon in the address bar → Site settings → Location → Allow, then refresh.") :
     null;
 
   const geoBannerColor =
@@ -377,41 +377,69 @@ export default function PredictionPage() {
     geoStatus === "requesting" ? "bg-blue-50  border-blue-200  text-blue-800"  :
     "bg-gray-50 border-gray-200 text-gray-700";
 
-  /* ── result speech text ──────────────────────────────────────────── */
-  const resultSpeechText = result
-    ? t("resultSpeech", result.recommendedCrop || "—", typeof result.confidence === "number" ? Math.round(result.confidence * 100) : "—")
-    : "";
+  /* ── result speech text — full sidebar narration ────────────────── */
+  const resultSpeechText = (() => {
+    if (!result) return "";
+    const crop = result.recommendedCrop || "unknown";
+    const conf = typeof result.confidence === "number" ? Math.round(result.confidence * 100) : "unknown";
+    const parts = [];
+
+    parts.push(`Recommended crop: ${crop}. Confidence: ${conf} percent.`);
+
+    if (result.weather) {
+      parts.push(`Weather at your location: Temperature ${result.weather.temperature} degrees Celsius. Humidity ${result.weather.humidity} percent. Average monthly rainfall ${result.weather.rainfall} millimeters.`);
+    }
+
+    if (result.yield?.available) {
+      parts.push(`Estimated yield: ${result.yield.yield_q_ha} quintals per hectare, totaling ${result.yield.total_yield_q} quintals on ${result.yield.farm_size_ha} hectares.`);
+      if (result.yield.note) parts.push(result.yield.note);
+    }
+
+    const msp = getMSP(crop);
+    if (msp) {
+      parts.push(`Government MSP price for ${crop}: ${msp.msp} rupees per quintal for ${msp.season} season. Change from last year: ${msp.change}.`);
+      if (result.yield?.total_yield_q) {
+        const revenue = Math.round(result.yield.total_yield_q * msp.msp);
+        parts.push(`Estimated revenue at MSP: ${revenue} rupees.`);
+      }
+    }
+
+    const info = getCropInfo(crop);
+    if (info) {
+      parts.push(`Growing guide for ${crop}: Season is ${info.season}. Water requirement is ${info.water}. Ideal soil pH is ${info.ph}. Duration is ${info.days} days. Tip: ${info.tip}`);
+    }
+
+    if (result.top3?.length > 1) {
+      const alts = result.top3.slice(1).map(a => `${a.crop} at ${Math.round(a.confidence * 100)} percent`).join(", ");
+      parts.push(`Alternative crops: ${alts}.`);
+    }
+
+    return parts.join(" ");
+  })();
 
   /* ── voice props factory ─────────────────────────────────────────── */
   const vp = (setter) => ({
     speechCode,
-    label: t("tapToSpeak"),
-    listeningLabel: t("listening"),
+    label: t("Tap to speak"),
+    listeningLabel: t("Listening…"),
     onResult: (txt) => setter(spokenToNumber(txt) || txt),
   });
 
   /* ════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-green-100 font-[Outfit,system-ui,sans-serif] text-gray-900">
+    <div className="min-h-screen bg-green-100 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif] text-gray-900 dark:text-slate-100">
       <Navbar />
 
       {/* ── top bar ── */}
-      <div className="border-b border-green-200 bg-green-50 px-4 py-2 sm:px-10">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="text-sm font-medium text-green-800 hover:text-green-900">
-            {t("backHome")}
-          </Link>
-          <LanguageSwitcher />
-        </div>
-      </div>
+      
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="mb-8 max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            {t("pageTitle")}
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100 sm:text-4xl">
+            {t("Crop Yield Prediction")}
           </h1>
           <p className="mt-2 text-base leading-relaxed text-gray-700">
-            {t("pageSubtitle")}
+            {t("Enter soil data and timing. Location is detected automatically.")}
           </p>
         </div>
 
@@ -425,15 +453,15 @@ export default function PredictionPage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
 
           {/* ══ FORM ══════════════════════════════════════════════════════ */}
-          <form onSubmit={handleSubmit} className="space-y-8 rounded-2xl border border-green-200 bg-white p-6 shadow-lg sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-8 rounded-2xl border border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-lg sm:p-8">
 
             {/* ── Location ── */}
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <HiOutlineMap className="h-5 w-5 text-green-700" />
-                <h2 className="text-lg font-semibold text-gray-900">{t("locationTitle")}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t("Location")}</h2>
               </div>
-              <p className="text-sm text-gray-600">{t("locationSubtitle")}</p>
+              <p className="text-sm text-gray-600">{t("Your location is detected automatically. You can also pin the map or type an address.")}</p>
 
               {/* Mode toggle */}
               <div className="flex flex-wrap gap-2 rounded-xl border border-green-200 bg-green-50/80 p-1">
@@ -448,7 +476,7 @@ export default function PredictionPage() {
                         : "text-gray-600 hover:bg-white/80 hover:text-gray-900"
                     }`}
                   >
-                    {mode === "map" ? t("mapPin") : t("locationDetails")}
+                    {mode === "map" ? t("Map & pin") : t("Location details")}
                   </button>
                 ))}
               </div>
@@ -461,7 +489,7 @@ export default function PredictionPage() {
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-green-400 bg-green-50 px-4 py-3 text-sm font-semibold text-green-900 shadow-sm transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 <HiOutlineMapPin className="h-4 w-4 text-green-700" />
-                {geoStatus === "requesting" ? t("detectingLocation") : t("useMyLocation")}
+                {geoStatus === "requesting" ? t("Detecting location…") : t("Use my current location")}
               </button>
 
               {locationMode === "map" ? (
@@ -476,12 +504,12 @@ export default function PredictionPage() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <FieldRow label={t("latitude")} hint="Auto-filled or pin the map">
+                      <FieldRow label={t("Latitude")} hint="Auto-filled or pin the map">
                         <input type="number" step="any" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="—" className={inputClass} />
                       </FieldRow>
                     </div>
                     <div className="space-y-2">
-                      <FieldRow label={t("longitude")} hint="Auto-filled or pin the map">
+                      <FieldRow label={t("Longitude")} hint="Auto-filled or pin the map">
                         <input type="number" step="any" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="—" className={inputClass} />
                       </FieldRow>
                     </div>
@@ -563,18 +591,18 @@ export default function PredictionPage() {
                     </div>
                   )}
 
-                  {geocodeStatus === "loading" && <p className="text-sm text-green-800">{t("detectingLocation")}</p>}
+                  {geocodeStatus === "loading" && <p className="text-sm text-green-800">{t("Detecting location…")}</p>}
                   {geocodeHint && <p className={`text-xs ${geocodeStatus === "error" ? "text-red-700" : "text-gray-600"}`}>{geocodeHint}</p>}
 
                   <button type="button" onClick={lookupCoordinatesNow} className="inline-flex w-full items-center justify-center rounded-xl border border-green-600 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-900 shadow-sm transition hover:bg-green-100 sm:w-auto">
-                    {t("lookupCoordinates")}
+                    {t("Look up coordinates now")}
                   </button>
 
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <FieldRow label={t("latitude")} hint="Filled automatically (editable)">
+                    <FieldRow label={t("Latitude")} hint="Filled automatically (editable)">
                       <input type="number" step="any" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="After lookup" className={inputClass} />
                     </FieldRow>
-                    <FieldRow label={t("longitude")} hint="Filled automatically (editable)">
+                    <FieldRow label={t("Longitude")} hint="Filled automatically (editable)">
                       <input type="number" step="any" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="After lookup" className={inputClass} />
                     </FieldRow>
                   </div>
@@ -586,22 +614,22 @@ export default function PredictionPage() {
             <section className="space-y-4 border-t border-green-100 pt-8">
               <div className="flex items-center gap-2">
                 <HiOutlineBeaker className="h-5 w-5 text-green-700" />
-                <h2 className="text-lg font-semibold text-gray-900">{t("soilNutrientsTitle")}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t("Soil & Nutrients")}</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <FieldRow label={t("soilPh")} hint={t("soilPhHint")} voiceProps={vp(setSoilPh)}>
+                  <FieldRow label={t("Soil pH")} hint={t("Typical range 4–9")} voiceProps={vp(setSoilPh)}>
                     <input type="number" step="0.1" min="0" max="14" value={soilPh} onChange={(e) => setSoilPh(e.target.value)} placeholder="e.g. 6.5" className={inputClass} />
                   </FieldRow>
                 </div>
-                <FieldRow label={t("nitrogen")} hint={t("kgHaHint")} voiceProps={vp(setNitrogen)}>
+                <FieldRow label={t("Nitrogen (N)")} hint={t("kg/ha or your lab units")} voiceProps={vp(setNitrogen)}>
                   <input type="number" step="0.1" min="0" value={nitrogen} onChange={(e) => setNitrogen(e.target.value)} placeholder="e.g. 120" className={inputClass} />
                 </FieldRow>
-                <FieldRow label={t("phosphorus")} hint={t("kgHaHint")} voiceProps={vp(setPhosphorus)}>
+                <FieldRow label={t("Phosphorus (P)")} hint={t("kg/ha or your lab units")} voiceProps={vp(setPhosphorus)}>
                   <input type="number" step="0.1" min="0" value={phosphorus} onChange={(e) => setPhosphorus(e.target.value)} placeholder="e.g. 45" className={inputClass} />
                 </FieldRow>
                 <div className="sm:col-span-2">
-                  <FieldRow label={t("potassium")} hint={t("kgHaHint")} voiceProps={vp(setPotassium)}>
+                  <FieldRow label={t("Potassium (K)")} hint={t("kg/ha or your lab units")} voiceProps={vp(setPotassium)}>
                     <input type="number" step="0.1" min="0" value={potassium} onChange={(e) => setPotassium(e.target.value)} placeholder="e.g. 200" className={inputClass} />
                   </FieldRow>
                 </div>
@@ -612,11 +640,11 @@ export default function PredictionPage() {
             <section className="space-y-4 border-t border-green-100 pt-8">
               <div className="flex items-center gap-2">
                 <HiOutlineCalendarDays className="h-5 w-5 text-green-700" />
-                <h2 className="text-lg font-semibold text-gray-900">{t("cropTimingTitle")}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t("Crop Timing")}</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-800">{t("cropMonth")}</label>
+                  <label className="block text-sm font-medium text-gray-800">{t("Month of crop")}</label>
                   <div className="relative">
                     <select value={cropMonth} onChange={(e) => setCropMonth(e.target.value)} className={`${inputClass} appearance-none pr-10`}>
                       {MONTHS.map((m) => <option key={m.value} value={m.value}>{m.labelKey}</option>)}
@@ -625,8 +653,8 @@ export default function PredictionPage() {
                   </div>
                 </div>
                 <FieldRow
-                  label={<span className="inline-flex items-center gap-1.5"><HiOutlineClock className="h-4 w-4 text-gray-500" />{t("duration")}</span>}
-                  hint={t("durationHint")}
+                  label={<span className="inline-flex items-center gap-1.5"><HiOutlineClock className="h-4 w-4 text-gray-500" />{t("Duration (days)")}</span>}
+                  hint={t("Growing period in days")}
                   voiceProps={vp(setDuration)}
                 >
                   <input type="number" step="1" min="1" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="e.g. 90" className={inputClass} />
@@ -664,30 +692,30 @@ export default function PredictionPage() {
                 disabled={loading}
                 className="inline-flex items-center justify-center rounded-xl bg-green-700 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {loading ? t("runningPrediction") : t("runPrediction")}
+                {loading ? t("Running prediction…") : t("Run prediction")}
               </button>
             </div>
           </form>
 
           {/* ══ RESULT SIDEBAR ══════════════════════════════════════════════ */}
-          <aside className="space-y-4 rounded-2xl border border-green-200 bg-white p-6 shadow-lg lg:sticky lg:top-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">{t("resultTitle")}</h3>
+          <aside className="space-y-4 rounded-2xl border border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-lg lg:sticky lg:top-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">{t("Result")}</h3>
             {!result ? (
               <div className="rounded-xl border border-dashed border-green-200 bg-green-50/50 p-6 text-center text-sm text-gray-600">
-                {t("resultPlaceholder")}
+                {t("Submit the form to see the recommended crop.")}
               </div>
             ) : (
               <div className="space-y-4">
 
                 {/* ── Recommended crop ── */}
                 <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("recommendedCrop")}</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("Recommended crop")}</p>
                   <p className="mt-2 text-3xl font-bold text-gray-900 capitalize">
                     {getCropInfo(result.recommendedCrop)?.emoji || "🌾"} {result.recommendedCrop || "—"}
                   </p>
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
-                      <span>{t("confidence")}</span>
+                      <span>{t("Confidence")}</span>
                       <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(result.confidence * 100)}%` : "—"}</span>
                     </div>
                     <div className="h-2 bg-green-100 rounded-full overflow-hidden">
@@ -819,9 +847,26 @@ export default function PredictionPage() {
                   </div>
                 )}
 
-                {/* ── Voice read ── */}
-                <VoiceSpeaker text={resultSpeechText} label={t("speakResult")} speechCode={speechCode} />
+                {/* ── Profit analysis button ── */}
+                {result.mlInput && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/profit", {
+                      state: {
+                        mlInput:         result.mlInput,
+                        top3:            result.top3,
+                        farmSizeHa:      result.yield?.farm_size_ha || 1,
+                        recommendedCrop: result.recommendedCrop,
+                      }
+                    })}
+                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 text-sm transition shadow-md"
+                  >
+                    📊 {t("See Profit Analysis for Top 3 Crops →")}
+                  </button>
+                )}
 
+                {/* ── Voice read ── */}
+                <VoiceSpeaker text={resultSpeechText} label={t("Read result aloud")} speechCode={speechCode} />
               </div>
             )}
           </aside>

@@ -405,3 +405,65 @@
 .hint-fail {
   color: #9ca3af;
 }
+
+/* ── Dark mode overrides ── */
+.dark .auth-page {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(74, 140, 63, 0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+}
+
+.dark .auth-card {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.dark .auth-brand-name,
+.dark .auth-title {
+  color: #e2e8f0;
+}
+
+.dark .auth-subtitle,
+.dark .form-group label {
+  color: #94a3b8;
+}
+
+.dark .form-group input,
+.dark .auth-form input {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .form-group input:focus {
+  border-color: var(--green-400);
+  box-shadow: 0 0 0 3px rgba(74, 140, 63, 0.2);
+}
+
+.dark .form-group input::placeholder {
+  color: #475569;
+}
+
+.dark .auth-footer {
+  color: #94a3b8;
+}
+
+.dark .oauth-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .oauth-btn:hover {
+  background: #334155;
+}
+
+.dark .oauth-divider {
+  color: #475569;
+}
+
+.dark .oauth-divider::before,
+.dark .oauth-divider::after {
+  background: #334155;
+}

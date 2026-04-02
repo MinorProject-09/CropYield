@@ -207,17 +207,21 @@ exports.predictCropYield = async (req, res) => {
         longitude: location.longitude ?? null,
         details: typeof location.details === "string" ? location.details : "",
       },
-      soilPh: Number(soilPh),
-      nitrogen: Number(nitrogen),
-      phosphorus: Number(phosphorus),
-      potassium: Number(potassium),
-      cropMonth: Number(cropMonth),
-      duration: Number(duration),
+      soilPh:      Number(soilPh),
+      nitrogen:    Number(nitrogen),
+      phosphorus:  Number(phosphorus),
+      potassium:   Number(potassium),
+      cropMonth:   Number(cropMonth),
+      duration:    Number(duration),
+      farmSizeHa:  mlPayload.farm_size_ha,
+      temperature,
+      humidity,
+      rainfall,
       recommendedCrop: recommendedCrop.trim(),
-      confidence: clamp01(confidence),
+      confidence:  clamp01(confidence),
+      top3:        mlResp.data?.top3 || [],
       yieldQHa:    yieldData.yield_q_ha    ?? null,
       totalYieldQ: yieldData.total_yield_q ?? null,
-      farmSizeHa:  yieldData.farm_size_ha  ?? null,
     })
 
     await prediction.save()
@@ -258,5 +262,48 @@ exports.deletePrediction = async (req, res) => {
     res.json({ message: "Deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getProfitRank = async (req, res) => {
+  try {
+    const { candidates, N, P, K, temperature, humidity, ph, rainfall, farm_size_ha } = req.body;
+
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return res.status(400).json({ message: "candidates array is required" });
+    }
+
+    const mlBaseUrl = (process.env.ML_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+
+    const payload = {
+      candidates,
+      N: Number(N),
+      P: Number(P),
+      K: Number(K),
+      temperature: Number(temperature),
+      humidity: Number(humidity),
+      ph: Number(ph),
+      rainfall: Number(rainfall),
+      farm_size_ha: Number(farm_size_ha) > 0 ? Number(farm_size_ha) : 1.0,
+    };
+
+    const resp = await fetchJsonWithTimeout(
+      `${mlBaseUrl}/profit-rank`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) },
+      12000
+    );
+
+    if (!resp.ok) {
+      return res.status(502).json({
+        message: "ML service profit-rank failed",
+        detail: resp.data,
+        mlStatus: resp.status,
+      });
+    }
+
+    res.json(resp.data);
+  } catch (err) {
+    console.error("getProfitRank:", err);
+    res.status(500).json({ message: err.message || "Profit rank failed" });
   }
 };
