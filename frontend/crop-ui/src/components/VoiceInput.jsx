@@ -72,12 +72,45 @@ export default function VoiceInput({
     setListening(false);
   }
 
-  if (!supported) return null; // Hide button if Speech API not available
-
   const sizeClasses =
     size === "sm"
       ? "h-7 w-7 rounded-lg text-xs"
       : "h-9 w-9 rounded-xl text-sm";
+
+  const micIcon = listening ? (
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="2" />
+    </svg>
+  ) : (
+    <svg
+      className="h-4 w-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+
+  if (!supported) {
+    return (
+      <button
+        type="button"
+        disabled
+        title="Voice input is not supported in this browser (try Chrome or Edge)"
+        aria-label="Voice input not available in this browser"
+        className={`relative flex shrink-0 cursor-not-allowed items-center justify-center border border-gray-200 bg-gray-50 text-gray-400 opacity-70 ${sizeClasses}`}
+      >
+        {micIcon}
+      </button>
+    );
+  }
 
   return (
     <button
@@ -102,20 +135,7 @@ export default function VoiceInput({
         <span className="absolute inset-0 animate-ping rounded-xl border-2 border-red-400 opacity-60" />
       )}
 
-      {listening ? (
-        /* Stop icon */
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="6" y="6" width="12" height="12" rx="2" />
-        </svg>
-      ) : (
-        /* Mic icon */
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-          <line x1="12" y1="19" x2="12" y2="23" />
-          <line x1="8"  y1="23" x2="16" y2="23" />
-        </svg>
-      )}
+      {micIcon}
     </button>
   );
 }

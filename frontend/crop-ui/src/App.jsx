@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Chatbot from "./components/Chatbot";
 import LandingPage from "./pages/LandingPage"
 import PredictionPage from "./pages/PredictionPage"
 import ProfitPage from "./pages/ProfitPage"
@@ -9,10 +10,16 @@ import VerifyEmail from "./pages/auth/VerifyEmail"
 import ForgotPassword from "./pages/auth/ForgotPassword"
 import ResetPassword from "./pages/auth/ResetPassword"
 import CropCalendar from "./pages/CropCalendar"
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 
+
+function AuthenticatedChatbot() {
+  const { user, loading } = useAuth();
+  if (loading || !user) return null;
+  return <Chatbot />;
+}
 
 function App() {
   return (
@@ -50,6 +57,7 @@ function App() {
             }
           />
         </Routes>
+        <AuthenticatedChatbot />
       </AuthProvider>
     </BrowserRouter>
   );

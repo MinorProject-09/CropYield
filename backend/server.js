@@ -63,10 +63,13 @@ app.get("/", (req, res) => {
 const authRoutes = require("./routes/authRoutes");
 const predictionRoutes = require("./routes/predictionRoutes");
 const geocodeRoutes = require("./routes/geocodeRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/ml/prediction", predictionRoutes);
 app.use("/api/geocode", geocodeRoutes);
+app.use("/api/chat", chatRoutes);
+
 
 // ✅ Global error handler — catches any unhandled errors
 app.use((err, req, res, next) => {
