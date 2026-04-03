@@ -3,6 +3,8 @@ import { useNavigate, Link, Navigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import OAuthButtons from "./OAuthButtons";
+import { auth, setupRecaptcha } from "../../firebase";
+import { signInWithPhoneNumber } from "firebase/auth";
 import "./auth.css";
 
 // Must match backend rules: uppercase, lowercase, underscore, min 8 chars
@@ -54,6 +56,7 @@ const SignUp = () => {
     confirm: "",
   });
   const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
 
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
@@ -111,7 +114,8 @@ const SignUp = () => {
   };
 
   const sendSignupOtp = async () => {
-    const phone = form.phoneNumber.replace(/\D/g, "");
+    const rawPhone = form.phoneNumber.trim();
+    const phone = rawPhone.replace(/\D/g, "");
     if (phone.length < 10) {
       setError("Enter a valid mobile number (10–15 digits).");
       return;
@@ -120,23 +124,32 @@ const SignUp = () => {
       setError("Enter your name.");
       return;
     }
+
+    const normalized = rawPhone.startsWith("+") ? `+${phone}` : `+91${phone}`;
     setLoadingMobileOtp(true);
     setError("");
     setInfo("");
+
     try {
-      const res = await api.post("/api/auth/mobile/register/request-otp", {
-        phoneNumber: phone,
-        name: form.name.trim(),
-      });
-      const hint =
-        res.data?.smsSent === false
-          ? " Configure Twilio on the server to receive SMS; until then check the server console for the code."
-          : " Enter the code below to finish registration.";
-      setInfo((res.data?.message || "OTP sent.") + hint);
+      // Ensure recaptcha container exists
+      const recaptchaContainer = document.getElementById("recaptcha-container");
+      if (!recaptchaContainer) {
+        throw new Error("Recaptcha container not found");
+      }
+
+      const verifier = setupRecaptcha("recaptcha-container");
+      if (!verifier) {
+        throw new Error("Failed to setup recaptcha verifier");
+      }
+
+      const result = await signInWithPhoneNumber(auth, normalized, verifier);
+      setConfirmationResult(result);
+      setInfo(`OTP sent to ${normalized}.`);
       setMobileStep("otp");
       setOtp("");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Could not send OTP.");
+      console.error("Firebase OTP error:", err);
+      setError(`Could not send Firebase OTP: ${err.message}`);
     } finally {
       setLoadingMobileOtp(false);
     }
@@ -153,13 +166,23 @@ const SignUp = () => {
       setError("Passwords don't match.");
       return;
     }
-    const phone = form.phoneNumber.replace(/\D/g, "");
+    if (!confirmationResult) {
+      setError("No OTP request in progress. Please request code again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
+
     try {
-      const res = await api.post("/api/auth/mobile/register/verify", {
-        phoneNumber: phone,
-        otp: otp.replace(/\D/g, ""),
+      const userCredential = await confirmationResult.confirm(otp.replace(/\D/g, ""));
+      const phoneNumber = userCredential.user?.phoneNumber;
+      if (!phoneNumber) {
+        throw new Error("Firebase verification did not return phone number.");
+      }
+
+      const res = await api.post("/api/auth/mobile/register/verify-firebase", {
+        phoneNumber,
         name: form.name.trim(),
         password: form.password,
       });
@@ -181,6 +204,7 @@ const SignUp = () => {
           <span className="auth-brand-icon">🌾</span>
           <h1 className="auth-brand-name">CropYield</h1>
         </div>
+        <div id="recaptcha-container" />
 
         <h2 className="auth-title">Create your account</h2>
         <p className="auth-subtitle">Start optimizing your harvest today</p>
@@ -254,7 +278,7 @@ const SignUp = () => {
         {mode === "mobile" && mobileStep === "details" && (
           <form onSubmit={handleMobileRequestOtp} className="auth-form">
             <p className="auth-tab-hint">
-              We’ll send a 6-digit code by SMS (Twilio). Enter it on the next step with your password to register.
+              We’ll send a 6-digit code by SMS (Firebase Phone Auth). Enter it on the next step with your password to register.
             </p>
             <div className="form-group">
               <label htmlFor="m-name">Full Name</label>

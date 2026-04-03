@@ -3,6 +3,8 @@ import { useNavigate, Link, useSearchParams, Navigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import OAuthButtons from "./OAuthButtons";
+import { auth, setupRecaptcha } from "../../firebase";
+import { signInWithPhoneNumber } from "firebase/auth";
 import "./auth.css";
 
 const Login = () => {
@@ -15,6 +17,7 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "", phoneNumber: "" });
   const [otp, setOtp] = useState("");
   const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState(null);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -94,7 +97,8 @@ const Login = () => {
   };
 
   const handleSendLoginOtp = async () => {
-    const phone = form.phoneNumber.replace(/\D/g, "");
+    const rawPhone = form.phoneNumber.trim();
+    const phone = rawPhone.replace(/\D/g, "");
     if (phone.length < 10) {
       setError("Enter a valid mobile number first.");
       return;
@@ -103,16 +107,16 @@ const Login = () => {
     setError("");
     setInfo("");
     try {
-      const res = await api.post("/api/auth/mobile/login/request-otp", { phoneNumber: phone });
+      const normalized = rawPhone.startsWith("+") ? `+${phone}` : `+91${phone}`;
+      const verifier = setupRecaptcha("recaptcha-container");
+      await verifier.render();
+      const result = await signInWithPhoneNumber(auth, normalized, verifier);
+      setConfirmationResult(result);
       setPhoneOtpSent(true);
-      const hint =
-        res.data?.smsSent === false
-          ? " Add Twilio credentials to the server to receive SMS; until then check the server console for the code."
-          : " Check your phone for the code.";
-      setInfo((res.data?.message || "If this number is registered, a code was sent.") + hint);
+      setInfo(`OTP sent to ${normalized}.`);
       setOtp("");
     } catch (err) {
-      setError(err.response?.data?.message || "Could not send OTP.");
+      setError(`Could not send Firebase OTP: ${err.message}`);
       setPhoneOtpSent(false);
     } finally {
       setLoadingPhoneOtp(false);
@@ -121,18 +125,22 @@ const Login = () => {
 
   const handleVerifyLoginOtp = async (e) => {
     e.preventDefault();
-    const phone = form.phoneNumber.replace(/\D/g, "");
+    if (!confirmationResult) {
+      setError("No OTP request in progress. Request code first.");
+      return;
+    }
     setLoadingPhoneOtp(true);
     setError("");
     try {
-      const res = await api.post("/api/auth/mobile/login/verify", {
-        phoneNumber: phone,
-        otp: otp.replace(/\D/g, ""),
-      });
+      const userCredential = await confirmationResult.confirm(otp.replace(/\D/g, ""));
+      const phoneNumber = userCredential.user?.phoneNumber;
+      if (!phoneNumber) throw new Error("Firebase verification returned no phone number.");
+
+      const res = await api.post("/api/auth/mobile/login/verify-firebase", { phoneNumber });
       await login(res.data.token, res.data.user);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid or expired code.");
+      setError(err.response?.data?.message || err.message || "Invalid or expired code.");
       setOtp("");
     } finally {
       setLoadingPhoneOtp(false);
@@ -146,6 +154,7 @@ const Login = () => {
           <span className="auth-brand-icon">🌾</span>
           <h1 className="auth-brand-name">CropYield</h1>
         </div>
+        <div id="recaptcha-container" />
 
         <h2 className="auth-title">Welcome back</h2>
         <p className="auth-subtitle">Sign in to your farming dashboard</p>
@@ -216,8 +225,7 @@ const Login = () => {
         {method === "phone" && (
           <div className="auth-form">
             <p className="auth-tab-hint">
-              Use your registered mobile number with a password, or request a one-time code (SMS via Twilio on the
-              server).
+              Use your registered mobile number with a password, or request a one-time code (SMS via Firebase Phone Auth).
             </p>
 
             <div className="form-group">
