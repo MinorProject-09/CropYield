@@ -16,7 +16,6 @@ export const CROP_INFO = {
   pomegranate:  { emoji: "🍎", season: "Perennial",water: "Low",   ph: "5.5–7.5", days: "150–180", tip: "Drought-tolerant once established. Prune after harvest for better fruiting." },
   banana:       { emoji: "🍌", season: "Perennial",water: "High",  ph: "5.5–7.0", days: "270–365", tip: "Needs warm humid climate. Mulch heavily. Remove suckers to maintain one per plant." },
   mango:        { emoji: "🥭", season: "Perennial",water: "Low",   ph: "5.5–7.5", days: "90–120",  tip: "Needs dry spell before flowering. Avoid nitrogen excess — it delays fruiting." },
-  grapes:       { emoji: "🍇", season: "Perennial",water: "Medium",ph: "6.0–7.5", days: "150–180", tip: "Prune annually. Train on trellis. Needs good air circulation to prevent fungal disease." },
   watermelon:   { emoji: "🍉", season: "Zaid",    water: "Medium", ph: "6.0–7.0", days: "70–90",   tip: "Needs warm soil. Space plants 2m apart. Reduce watering as fruits mature for sweetness." },
   muskmelon:    { emoji: "🍈", season: "Zaid",    water: "Medium", ph: "6.0–7.0", days: "70–90",   tip: "Similar to watermelon. Stop irrigation 10 days before harvest for better flavor." },
   apple:        { emoji: "🍎", season: "Rabi",    water: "Medium", ph: "5.5–6.5", days: "150–180", tip: "Needs chilling hours in winter. Thin fruits early for larger size. Spray for scab." },

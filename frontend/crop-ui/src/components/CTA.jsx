@@ -5,7 +5,7 @@ function CTA() {
   const { user } = useAuth();
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-green-800 to-green-900 text-white">
+    <section className="py-20 px-6 bg-linear-to-br from-green-800 to-green-900 text-white">
       <div className="max-w-3xl mx-auto text-center">
         <div className="text-5xl mb-6">🌾</div>
         <h2 className="text-3xl md:text-4xl font-bold mb-4">

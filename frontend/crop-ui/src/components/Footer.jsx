@@ -28,7 +28,7 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-3 text-sm uppercase tracking-wide">Crops Supported</h4>
             <p className="text-sm leading-relaxed">
-              Rice, Wheat, Maize, Chickpea, Kidney Beans, Pigeon Peas, Moth Beans, Mung Bean, Black Gram, Lentil, Pomegranate, Banana, Mango, Grapes, Watermelon, Muskmelon, Apple, Orange, Papaya, Coconut, Cotton, Jute, Coffee.
+              Rice, Wheat, Maize, Chickpea, Kidney Beans, Pigeon Peas, Moth Beans, Mung Bean, Black Gram, Lentil, Pomegranate, Banana, Mango, Watermelon, Muskmelon, Apple, Orange, Papaya, Coconut, Cotton, Jute, Coffee.
             </p>
           </div>
         </div>

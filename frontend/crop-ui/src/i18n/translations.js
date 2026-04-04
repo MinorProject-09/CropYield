@@ -1,3 +1,4 @@
+
 /**
  * translations.js
  * Central translation file for all supported languages.

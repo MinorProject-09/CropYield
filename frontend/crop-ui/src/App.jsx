@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage"
 import PredictionPage from "./pages/PredictionPage"
+import CropNutrient from "./pages/CropNutrient"
 import Login from "./pages/auth/Login"
 import SignUp from "./pages/auth/SignUp"
 import OAuthCallback from "./pages/auth/OAuthCallback"
@@ -28,6 +29,7 @@ function App() {
               <PredictionPage />
             </ProtectedRoute>
           } />
+          <Route path="/crop-nutrition" element={<CropNutrient />} />
           <Route path="/auth/callback" element={<OAuthCallback />} />
           <Route
             path="/dashboard"

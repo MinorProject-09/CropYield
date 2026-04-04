@@ -76,7 +76,10 @@ function OverviewTab({ history, historyLoading }) {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Last Prediction</h3>
-            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">New prediction →</Link>
+            <div className="flex gap-2">
+              <Link to="/crop-nutrition" className="text-xs text-blue-600 font-semibold hover:underline">View Nutrition Info</Link>
+              <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">New prediction →</Link>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-4xl">{getCropInfo(lastPrediction.recommendedCrop)?.emoji || "🌾"}</div>
@@ -187,7 +190,7 @@ function HistoryTab({ history, loading, onDelete }) {
         return (
           <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-green-200 transition">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl shrink-0">
                 {info?.emoji || "🌾"}
               </div>
               <div className="flex-1 min-w-0">
@@ -205,7 +208,7 @@ function HistoryTab({ history, loading, onDelete }) {
                   <span>🧪 pH {p.soilPh} · N{p.nitrogen} P{p.phosphorus} K{p.potassium}</span>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+              <div className="flex flex-col items-end gap-2 shrink-0">
                 <div className="text-xs text-gray-400 text-right">
                   {new Date(p.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                   <br />
@@ -277,7 +280,7 @@ function ProfileTab({ user, setUser }) {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 py-5 flex items-center gap-4">
+      <div className="bg-linear-to-r from-green-700 to-green-600 px-6 py-5 flex items-center gap-4">
         <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl font-bold text-white">
           {user?.name?.[0]?.toUpperCase() || "?"}
         </div>
@@ -406,7 +409,7 @@ export default function Dashboard() {
       <main className="min-h-screen bg-gray-50">
 
         {/* Hero */}
-        <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+        <div className="bg-linear-to-br from-green-800 to-green-700 text-white px-6 py-10">
           <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
             <div>
               <p className="text-green-300 text-sm mb-1">Dashboard</p>

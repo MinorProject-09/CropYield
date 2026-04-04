@@ -58,6 +58,7 @@ function Navbar() {
         {/* Desktop nav */}
         <div className="space-x-6 hidden md:flex text-sm font-medium">
           <Link to="/" className="hover:text-green-200 transition">Home</Link>
+          <Link to="/crop-nutrition" className="hover:text-green-200 transition">Crop Nutrition</Link>
           {user && <Link to="/prediction" className="hover:text-green-200 transition">Prediction</Link>}
           {user && <Link to="/dashboard" className="hover:text-green-200 transition">Dashboard</Link>}
         </div>
