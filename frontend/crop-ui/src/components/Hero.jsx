@@ -12,7 +12,7 @@ function Hero() {
   const { user } = useAuth();
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-green-900 via-green-800 to-green-700 text-white">
+    <section className="relative overflow-hidden bg-linear-to-br from-green-900 via-green-800 to-green-700 text-white">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: "radial-gradient(circle at 25% 25%, #fff 1px, transparent 1px), radial-gradient(circle at 75% 75%, #fff 1px, transparent 1px)", backgroundSize: "40px 40px" }}

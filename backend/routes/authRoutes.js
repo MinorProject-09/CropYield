@@ -14,6 +14,13 @@ router.post("/resend-verification", authController.resendVerification);
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);
 
+router.post("/mobile/register/request-otp", authController.mobileRegisterRequestOtp);
+router.post("/mobile/register/verify", authController.mobileRegisterVerify);
+router.post("/mobile/register/verify-firebase", authController.mobileRegisterVerifyFirebase);
+router.post("/mobile/login/request-otp", authController.mobileLoginRequestOtp);
+router.post("/mobile/login/verify", authController.mobileLoginVerify);
+router.post("/mobile/login/verify-firebase", authController.mobileLoginVerifyFirebase);
+
 router.get("/me", authMiddleware, authController.getMe);
 router.put("/profile", authMiddleware, authController.updateProfile);
 

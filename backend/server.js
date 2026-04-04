@@ -5,6 +5,9 @@ const passport = require("passport");
 const session = require("express-session");
 require("dotenv").config();
 
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']); // Force Google and Cloudflare DNS
+
 // ✅ Fail fast on missing env vars
 const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"];
 REQUIRED_ENV.forEach((key) => {
@@ -34,7 +37,6 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
-
 
 // ✅ 2. Body parser
 app.use(express.json());
@@ -76,7 +78,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {family : 4})
   .then(() => {
     console.log("✅ MongoDB Connected");
     app.listen(PORT, () => {

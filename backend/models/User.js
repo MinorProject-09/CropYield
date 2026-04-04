@@ -9,8 +9,18 @@ const UserSchema = new mongoose.Schema(
 
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
+  },
+
+  phoneNumber: {
+    type: String,
+    required: false,
+    unique: true,
+    sparse: true,
+    lowercase: true,
+    trim: true,
   },
 
   password: {
@@ -52,8 +62,13 @@ const UserSchema = new mongoose.Schema(
 
   provider: {
     type: String,
-    enum: ["local", "google", "github"],
+    enum: ["local", "google", "github", "mobile"],
     default: "local"
+  },
+
+  phoneVerified: {
+    type: Boolean,
+    default: false
   },
 
   emailVerified: {
