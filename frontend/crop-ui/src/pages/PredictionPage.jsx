@@ -12,6 +12,9 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import VoiceInput from "../components/VoiceInput";
 import VoiceSpeaker from "../components/VoiceSpeaker";
+import SoilHealthCard from "../components/SoilHealthCard";
+import PestAlertCard from "../components/PestAlertCard";
+import CropGuideModal from "../components/CropGuideModal";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
@@ -68,11 +71,6 @@ function parseGeocodeError(err) {
   return "Could not look up coordinates.";
 }
 
-function cropDetailPageUrl(cropName) {
-  if (!cropName) return "/prediction";
-  return `/crop/${encodeURIComponent(cropName.trim().toLowerCase())}`;
-}
-
 async function checkGeoPermission() {
   if (!navigator.permissions) return "unknown";
   try {
@@ -120,6 +118,7 @@ export default function PredictionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [guideModal, setGuideModal] = useState(null);
 
   /* ── geocode status ── */
   const [geocodeStatus, setGeocodeStatus] = useState("idle");
@@ -434,6 +433,7 @@ export default function PredictionPage() {
   /* ════════════════════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen bg-green-100 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif] text-gray-900 dark:text-slate-100">
+      {guideModal && <CropGuideModal cropName={guideModal} onClose={() => setGuideModal(null)} />}
       <Navbar />
 
       {/* ── top bar ── */}
@@ -715,16 +715,18 @@ export default function PredictionPage() {
                   <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("Recommended crop")}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold text-gray-900 capitalize">
                     <div className="flex items-center gap-2">
-                      <img src={getCropInfo(result.recommendedCrop)?.zoomedImage} alt={result.recommendedCrop} className="w-10 h-10" />
+                      <span className="text-4xl">{getCropInfo(result.recommendedCrop)?.emoji || "🌾"}</span>
                       <span>{result.recommendedCrop || "—"}</span>
                     </div>
-                    <Link
-                      to={cropDetailPageUrl(result.recommendedCrop)}
+                    <button
+                      type="button"
+                      onClick={() => setGuideModal(result.recommendedCrop)}
                       className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-green-300 hover:text-green-700"
-                      aria-label={`View details for ${result.recommendedCrop}`}
+                      aria-label={`View guide for ${result.recommendedCrop}`}
+                      title="View farming guide"
                     >
                       <HiOutlineInformationCircle className="h-5 w-5" />
-                    </Link>
+                    </button>
               
                   </div>
                   <div className="mt-3">
@@ -853,15 +855,17 @@ export default function PredictionPage() {
                       {result.top3.slice(1).map((alt) => (
                         <div key={alt.crop} className="flex items-center justify-between gap-3 text-sm">
                           <div className="flex items-center gap-2 capitalize text-gray-700">
-                            <img src={getCropInfo(alt.crop)?.image} alt={alt.crop} className="w-5 h-5" />
+                            <span className="text-lg">{getCropInfo(alt.crop)?.emoji || "🌾"}</span>
                             <span>{alt.crop}</span>
-                            <Link
-                              to={cropDetailPageUrl(alt.crop)}
+                            <button
+                              type="button"
+                              onClick={() => setGuideModal(alt.crop)}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-green-300 hover:text-green-700"
-                              aria-label={`View details for ${alt.crop}`}
+                              aria-label={`View guide for ${alt.crop}`}
+                              title="View farming guide"
                             >
                               <HiOutlineInformationCircle className="h-4 w-4" />
-                            </Link>
+                            </button>
                           </div>
                           <span className="text-xs font-semibold text-gray-500">{Math.round(alt.confidence * 100)}%</span>
                         </div>
@@ -869,6 +873,19 @@ export default function PredictionPage() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Soil health + pest alerts ── */}
+                <SoilHealthCard
+                  N={result.mlInput?.N}
+                  P={result.mlInput?.P}
+                  K={result.mlInput?.K}
+                  ph={result.mlInput?.ph}
+                  crop={result.recommendedCrop}
+                />
+                <PestAlertCard
+                  crop={result.recommendedCrop}
+                  cropMonth={cropMonth}
+                />
 
                 {/* ── Profit analysis button ── */}
                 {result.mlInput && (

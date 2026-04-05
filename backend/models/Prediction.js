@@ -29,6 +29,9 @@ const predictionSchema = new mongoose.Schema({
   // Yield output
   yieldQHa:    { type: Number, default: null },
   totalYieldQ: { type: Number, default: null },
+  actualYieldQ:  { type: Number, default: null },
+  harvestNotes:  { type: String, default: "" },
+  harvestedAt:   { type: Date,   default: null },
 
   createdAt: { type: Date, default: Date.now },
 })
