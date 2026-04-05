@@ -8,6 +8,7 @@ import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { getCropInfo } from "../data/cropInfo";
 import { getMSP, MSP_2024 } from "../data/mspData";
+import YieldTracker from "../components/YieldTracker";
 
 const SOIL_TYPES = ["Sandy", "Loamy", "Clay", "Silt", "Peaty", "Chalky", "Sandy Loam", "Clay Loam", "Other"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -62,7 +63,20 @@ function OverviewTab({ history, historyLoading }) {
   return (
     <div className="space-y-6">
       {/* Stats */}
-     
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: "🌾", label: t("Total Predictions"), value: history.length, color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700" },
+          { icon: "✅", label: t("Harvests Logged"),   value: history.filter(p => p.actualYieldQ != null).length, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" },
+          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.emoji || "🌾") + " " + history[0].recommendedCrop : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
+          { icon: "📈", label: t("Avg Confidence"),    value: history.length ? Math.round(history.reduce((s, p) => s + p.confidence, 0) / history.length * 100) + "%" : "—", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700" },
+        ].map(({ icon, label, value, color }) => (
+          <div key={label} className={`rounded-2xl border p-4 ${color}`}>
+            <div className="text-xl mb-1">{icon}</div>
+            <div className="font-bold text-gray-900 dark:text-slate-100 text-sm capitalize">{value}</div>
+            <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{label}</div>
+          </div>
+        ))}
+      </div>
 
       {/* Daily tip */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
@@ -242,7 +256,7 @@ function HistoryTab({ history, loading, onDelete }) {
             </div>
 
             {/* Profit analysis button */}
-            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 flex gap-2">
               <button
                 type="button"
                 onClick={() => navigate("/profit", {
@@ -263,11 +277,17 @@ function HistoryTab({ history, loading, onDelete }) {
                     predictionDate:  p.createdAt,
                   }
                 })}
-                className="w-full flex items-center justify-center gap-2 text-xs font-semibold text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 rounded-xl py-2 transition"
+                className="flex-1 flex items-center justify-center gap-2 text-xs font-semibold text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/40 rounded-xl py-2 transition"
               >
                 📊 {t("View Profit Analysis")}
               </button>
             </div>
+
+            {/* Yield tracker */}
+            <YieldTracker
+              prediction={p}
+              onUpdated={(updated) => setHistory(h => h.map(x => x._id === updated._id ? updated : x))}
+            />
           </div>
         );
       })}

@@ -11,6 +11,8 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import VoiceInput from "../components/VoiceInput";
 import VoiceSpeaker from "../components/VoiceSpeaker";
+import SoilHealthCard from "../components/SoilHealthCard";
+import PestAlertCard from "../components/PestAlertCard";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
@@ -846,6 +848,19 @@ export default function PredictionPage() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Soil health + pest alerts ── */}
+                <SoilHealthCard
+                  N={result.mlInput?.N}
+                  P={result.mlInput?.P}
+                  K={result.mlInput?.K}
+                  ph={result.mlInput?.ph}
+                  crop={result.recommendedCrop}
+                />
+                <PestAlertCard
+                  crop={result.recommendedCrop}
+                  cropMonth={cropMonth}
+                />
 
                 {/* ── Profit analysis button ── */}
                 {result.mlInput && (
