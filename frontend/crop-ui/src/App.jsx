@@ -10,6 +10,8 @@ import VerifyEmail from "./pages/auth/VerifyEmail"
 import ForgotPassword from "./pages/auth/ForgotPassword"
 import ResetPassword from "./pages/auth/ResetPassword"
 import CropCalendar from "./pages/CropCalendar"
+import CropDetailPage from "./pages/CropDetailPage"
+import { AuthProvider } from "./context/AuthContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
@@ -45,6 +47,11 @@ function App() {
           <Route path="/profit" element={
             <ProtectedRoute>
               <ProfitPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/crop/:cropName" element={
+            <ProtectedRoute>
+              <CropDetailPage />
             </ProtectedRoute>
           } />
           <Route path="/auth/callback" element={<OAuthCallback />} />
