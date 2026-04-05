@@ -7,7 +7,7 @@ import { getPredictionHistory, updateProfile, deletePrediction } from "../api/ap
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { getCropInfo } from "../data/cropInfo";
-import { getMSP, MSP_2024 } from "../data/mspData";
+import { MSP_2024 } from "../data/mspData";
 import YieldTracker from "../components/YieldTracker";
 
 const SOIL_TYPES = ["Sandy", "Loamy", "Clay", "Silt", "Peaty", "Chalky", "Sandy Loam", "Clay Loam", "Other"];
@@ -124,7 +124,7 @@ function OverviewTab({ history, historyLoading }) {
 }
 
 // ── History Tab ───────────────────────────────────────────────────────────────
-function HistoryTab({ history, loading, onDelete }) {
+function HistoryTab({ history, loading, onDelete, setHistory }) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(null);
@@ -565,7 +565,7 @@ export default function Dashboard() {
 
           {/* Tab content */}
           {activeTab === "overview" && <OverviewTab history={history} historyLoading={historyLoading} />}
-          {activeTab === "history"  && <HistoryTab  history={history} loading={historyLoading} onDelete={handleDelete} />}
+          {activeTab === "history"  && <HistoryTab  history={history} loading={historyLoading} onDelete={handleDelete} setHistory={setHistory} />}
           {activeTab === "msp"      && <MSPTab />}
           {activeTab === "profile"  && <ProfileTab  user={user} setUser={setUser} />}
         </div>
