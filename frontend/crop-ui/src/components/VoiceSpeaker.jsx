@@ -70,11 +70,11 @@ export default function VoiceSpeaker({ text, label = "Read result aloud", speech
       type="button"
       onClick={speaking ? stop : speak}
       className={`
-        inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition
+        inline-flex items-center gap-2  flex-col rounded-3xl border px-5 py-4 text-large font-sm transition bg-white shadow-lg
         ${
           speaking
             ? "border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
-            : "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700 text-green-800 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40"
+            : "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700 text-green-800 dark:text-green-300 hover:bg-slate-100 dark:hover:bg-green-900/40 "
         }
       `}
     >

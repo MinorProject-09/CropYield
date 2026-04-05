@@ -453,6 +453,7 @@ export default function PredictionPage() {
         {geoBannerText && (
           <div className={`mb-6 rounded-xl border px-4 py-3 text-sm ${geoBannerColor}`}>
             {geoBannerText}
+
           </div>
         )}
 
@@ -601,7 +602,7 @@ export default function PredictionPage() {
                   <button type="button" onClick={lookupCoordinatesNow} className="inline-flex w-full items-center justify-center rounded-xl border border-green-600 bg-green-50 px-4 py-2.5 text-sm font-semibold text-green-900 shadow-sm transition hover:bg-green-100 sm:w-auto">
                     {t("Look up coordinates now")}
                   </button>
-
+                  
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FieldRow label={t("Latitude")} hint="Filled automatically (editable)">
                       <input type="number" step="any" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="After lookup" className={inputClass} />
@@ -672,7 +673,6 @@ export default function PredictionPage() {
                     <input
                       type="number"
                       step="0.1"
-                      min="0.01"
                       value={farmSizeHa}
                       onChange={(e) => setFarmSizeHa(e.target.value)}
                       placeholder="e.g. 2.5  (default: 1 ha)"
@@ -725,6 +725,7 @@ export default function PredictionPage() {
                     >
                       <HiOutlineInformationCircle className="h-5 w-5" />
                     </Link>
+              
                   </div>
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
@@ -765,6 +766,7 @@ export default function PredictionPage() {
                   </div>
                 )}
 
+                <VoiceSpeaker text={resultSpeechText} label={t("Read result aloud")} speechCode={speechCode} />
                 {/* ── Yield estimation ── */}
                 {result.yield?.available && (
                   <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
@@ -887,8 +889,6 @@ export default function PredictionPage() {
                   </button>
                 )}
 
-                {/* ── Voice read ── */}
-                <VoiceSpeaker text={resultSpeechText} label={t("Read result aloud")} speechCode={speechCode} />
               </div>
             )}
           </aside>

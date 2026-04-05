@@ -4,6 +4,8 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getCropInfo } from "../data/cropInfo";
+import VoiceSpeaker from "../components/VoiceSpeaker";
+
 
 function SectionCard({ title, children }) {
   return (
@@ -41,14 +43,66 @@ function ListSection({ label, items }) {
   );
 }
 
+
+
+
 export default function CropDetailPage() {
-  const { t } = useLanguage();
+
+  const { t, speechCode } = useLanguage();
   const navigate = useNavigate();
   const { cropName } = useParams();
 
   const decodedCrop = decodeURIComponent(cropName || "").trim();
   const cropKey = decodedCrop.toLowerCase().replace(/\s+/g, " ");
   const info = getCropInfo(cropKey);
+
+  const resultSpeechText = (() => {
+    if (!info) {
+      return `Details for this crop are not available. Please go back and try again .`;
+    }
+  
+    const listToSpeech = (arr) => {
+      if (!arr || arr.length === 0) return "Not available.";
+      return arr.map(item => t(item)).join(". ");
+    };
+  
+    return `
+    ${decodedCrop} crop details.
+  
+    Overview:
+    This crop is grown in the ${t(info.season)} season.
+    It requires ${t(info.water)} water.
+    Ideal soil pH is ${t(info.ph)}.
+    Total growing duration is ${info.days} days.
+    Quick tip: ${t(info.tip)}.
+  
+    Equipment required:
+    ${listToSpeech(info.equipment)}
+  
+    Sowing details:
+    When to sow: ${t(info.sow || "Not specified")}.
+    How to sow: ${listToSpeech(info.howToSow)}.
+  
+    Harvesting details:
+    When to harvest: ${t(info.harvest || "Not specified")}.
+    How to harvest: ${listToSpeech(info.howToHarvest)}.
+  
+    Seeds and varieties:
+    Recommended seeds: ${listToSpeech(info.seedTypes)}.
+    Seed benefits: ${t(info.seedBenefits || "Not specified")}.
+  
+    Fertilizers:
+    ${listToSpeech(info.fertilizers)}.
+  
+    Pesticides and crop protection:
+    ${listToSpeech(info.pesticides)}.
+  
+    Additional guidance:
+    ${t(info.notes || "No additional guidance available.")}.
+  
+    These details will help you plan sowing, growing, and harvesting properly for better yield and profit.
+    `;
+  })();
 
   return (
     <div className="min-h-screen bg-green-100 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif] text-gray-900 dark:text-slate-100">
@@ -78,6 +132,8 @@ export default function CropDetailPage() {
                 : t("Detailed guide for this crop is not available yet. Explore other crops or return to prediction.")}
             </p>
           </div>
+          <VoiceSpeaker text={resultSpeechText} label={t("Read details aloud")} speechCode={speechCode} />
+
         </div>
 
         {!info ? (
