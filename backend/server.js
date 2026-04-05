@@ -5,6 +5,9 @@ const passport = require("passport");
 const session = require("express-session");
 require("dotenv").config();
 
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']); // Force Google and Cloudflare DNS
+
 // ✅ Fail fast on missing env vars
 const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"];
 REQUIRED_ENV.forEach((key) => {
@@ -35,7 +38,6 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-
 // ✅ 2. Body parser
 app.use(express.json());
 
@@ -63,10 +65,13 @@ app.get("/", (req, res) => {
 const authRoutes = require("./routes/authRoutes");
 const predictionRoutes = require("./routes/predictionRoutes");
 const geocodeRoutes = require("./routes/geocodeRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/ml/prediction", predictionRoutes);
 app.use("/api/geocode", geocodeRoutes);
+app.use("/api/chat", chatRoutes);
+
 
 // ✅ Global error handler — catches any unhandled errors
 app.use((err, req, res, next) => {
@@ -76,7 +81,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {family : 4})
   .then(() => {
     console.log("✅ MongoDB Connected");
     app.listen(PORT, () => {

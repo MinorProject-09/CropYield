@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const steps = [
@@ -6,6 +7,7 @@ const steps = [
   { num: "03", icon: "📅", titleKey: "Pick Planting Month",       descKey: "Select the month you plan to sow and the expected crop duration in days. This aligns predictions with seasonal patterns." },
   { num: "04", icon: "🌾", titleKey: "Get Your Recommendation",   descKey: "Our ML model instantly returns the best crop for your conditions along with a confidence score and alternative suggestions." },
 ];
+
 
 function HowItWorks() {
   const { t } = useLanguage();
