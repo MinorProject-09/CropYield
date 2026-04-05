@@ -58,7 +58,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
         {/* Crop name */}
         <td className="px-3 py-4 whitespace-nowrap">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{info?.emoji || "🌾"}</span>
+            <img src={info?.image} alt={item.crop} className="w-8 h-8" />
             <div>
               <div className="font-bold text-gray-900 dark:text-slate-100 capitalize text-sm">{item.crop}</div>
               <div className="text-xs text-gray-400 dark:text-slate-500">{info?.season || "—"}</div>
@@ -188,7 +188,7 @@ function GuideModal({ item, onClose, t }) {
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-3xl">{info?.emoji || "🌾"}</span>
+            <img src={info?.image} alt={item.crop} className="w-10 h-10" />
             <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 capitalize">{item.crop}</h2>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 text-xl">✕</button>
@@ -358,7 +358,7 @@ export default function ProfitPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{RANK_MEDAL[idx]}</span>
-                        <span className="text-xl">{info?.emoji || "🌾"}</span>
+                        <img src={info?.image} alt={item.crop} className="w-6 h-6" />
                         <span className="font-bold text-gray-900 dark:text-slate-100 capitalize">{item.crop}</span>
                       </div>
                       <span className={`text-sm font-bold ${item.profit_current >= 0 ? "text-green-700 dark:text-green-400" : "text-red-600"}`}>
@@ -448,7 +448,7 @@ export default function ProfitPage() {
                     {ranked.map(item => (
                       <tr key={item.crop} className="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30">
                         <td className="py-2 pr-4 font-medium text-gray-800 dark:text-slate-200 capitalize">
-                          {getCropInfo(item.crop)?.emoji} {item.crop}
+                          <img src={getCropInfo(item.crop)?.image} alt={item.crop} className="w-4 h-4 inline mr-1" /> {item.crop}
                         </td>
                         <td className="text-center py-2 px-3 text-gray-600 dark:text-slate-400">₹{item.market_price_prev?.toLocaleString("en-IN")}</td>
                         <td className="text-center py-2 px-3 font-semibold text-gray-900 dark:text-slate-100">₹{item.market_price_current?.toLocaleString("en-IN")}</td>

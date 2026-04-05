@@ -83,7 +83,7 @@ function OverviewTab({ history, historyLoading }) {
             <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">{t("New prediction →")}</Link>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-4xl">{getCropInfo(lastPrediction.recommendedCrop)?.emoji || "🌾"}</div>
+            <img src={getCropInfo(lastPrediction.recommendedCrop)?.image} alt={lastPrediction.recommendedCrop} className="w-16 h-16" />
             <div className="flex-1">
               <p className="text-xl font-bold text-green-800 capitalize">{lastPrediction.recommendedCrop}</p>
               <ConfidenceBar value={lastPrediction.confidence} />
@@ -207,7 +207,7 @@ function HistoryTab({ history, loading, onDelete }) {
           <div key={p._id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:border-green-200 dark:hover:border-green-700 transition">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
-                {info?.emoji || "🌾"}
+                <img src={info?.image} alt={p.recommendedCrop} className="w-8 h-8 rounded" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -445,7 +445,7 @@ function MSPTab() {
                 const info = getCropInfo(crop);
                 return (
                   <div key={crop} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3 shadow-sm hover:border-green-200 transition">
-                    <span className="text-2xl">{info?.emoji || "🌾"}</span>
+                    <img src={info?.image} alt={crop} className="w-8 h-8" />
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 capitalize text-sm">{crop.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>
                       <p className="text-xs text-gray-400">{data.season}</p>

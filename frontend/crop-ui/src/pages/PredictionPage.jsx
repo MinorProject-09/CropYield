@@ -4,6 +4,7 @@ import {
   HiOutlineBeaker,
   HiOutlineCalendarDays,
   HiOutlineClock,
+  HiOutlineInformationCircle,
   HiOutlineMap,
   HiOutlineMapPin,
 } from "react-icons/hi2";
@@ -26,18 +27,18 @@ import {
 const LocationMapPicker = lazy(() => import("../components/LocationMapPicker.jsx"));
 
 const MONTHS = [
-  { value: 1,  labelKey: "January"   },
-  { value: 2,  labelKey: "February"  },
-  { value: 3,  labelKey: "March"     },
-  { value: 4,  labelKey: "April"     },
-  { value: 5,  labelKey: "May"       },
-  { value: 6,  labelKey: "June"      },
-  { value: 7,  labelKey: "July"      },
-  { value: 8,  labelKey: "August"    },
-  { value: 9,  labelKey: "September" },
-  { value: 10, labelKey: "October"   },
-  { value: 11, labelKey: "November"  },
-  { value: 12, labelKey: "December"  },
+  { value: 1, labelKey: "January" },
+  { value: 2, labelKey: "February" },
+  { value: 3, labelKey: "March" },
+  { value: 4, labelKey: "April" },
+  { value: 5, labelKey: "May" },
+  { value: 6, labelKey: "June" },
+  { value: 7, labelKey: "July" },
+  { value: 8, labelKey: "August" },
+  { value: 9, labelKey: "September" },
+  { value: 10, labelKey: "October" },
+  { value: 11, labelKey: "November" },
+  { value: 12, labelKey: "December" },
 ];
 
 /* ── Reusable labelled field row with optional mic button ─────────────── */
@@ -67,6 +68,11 @@ function parseGeocodeError(err) {
   return "Could not look up coordinates.";
 }
 
+function cropDetailPageUrl(cropName) {
+  if (!cropName) return "/prediction";
+  return `/crop/${encodeURIComponent(cropName.trim().toLowerCase())}`;
+}
+
 async function checkGeoPermission() {
   if (!navigator.permissions) return "unknown";
   try {
@@ -82,42 +88,42 @@ export default function PredictionPage() {
   const navigate = useNavigate();
 
   /* ── location ── */
-  const [locationMode,   setLocationMode]   = useState("map");
-  const [latitude,       setLatitude]       = useState("");
-  const [longitude,      setLongitude]      = useState("");
-  const [mapFocusNonce,  setMapFocusNonce]  = useState(0);
-  const [geoStatus,      setGeoStatus]      = useState("idle");
+  const [locationMode, setLocationMode] = useState("map");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [mapFocusNonce, setMapFocusNonce] = useState(0);
+  const [geoStatus, setGeoStatus] = useState("idle");
 
   /* ── address detail ── */
-  const [locationDetails,          setLocationDetails]          = useState("");
-  const [addressDetailMode,        setAddressDetailMode]        = useState("free");
-  const [structuredState,          setStructuredState]          = useState("");
+  const [locationDetails, setLocationDetails] = useState("");
+  const [addressDetailMode, setAddressDetailMode] = useState("free");
+  const [structuredState, setStructuredState] = useState("");
   const [structuredDistrictSelect, setStructuredDistrictSelect] = useState("");
-  const [structuredDistrictOther,  setStructuredDistrictOther]  = useState("");
-  const [structuredDistrictText,   setStructuredDistrictText]   = useState("");
-  const [structuredVillage,        setStructuredVillage]        = useState("");
-  const [structuredPincode,        setStructuredPincode]        = useState("");
-  const [googleConfigured,         setGoogleConfigured]         = useState(false);
+  const [structuredDistrictOther, setStructuredDistrictOther] = useState("");
+  const [structuredDistrictText, setStructuredDistrictText] = useState("");
+  const [structuredVillage, setStructuredVillage] = useState("");
+  const [structuredPincode, setStructuredPincode] = useState("");
+  const [googleConfigured, setGoogleConfigured] = useState(false);
 
   /* ── soil ── */
-  const [soilPh,     setSoilPh]     = useState("");
-  const [nitrogen,   setNitrogen]   = useState("");
+  const [soilPh, setSoilPh] = useState("");
+  const [nitrogen, setNitrogen] = useState("");
   const [phosphorus, setPhosphorus] = useState("");
-  const [potassium,  setPotassium]  = useState("");
+  const [potassium, setPotassium] = useState("");
 
   /* ── timing ── */
-  const [cropMonth,   setCropMonth]   = useState("6");
-  const [duration,    setDuration]    = useState("");
-  const [farmSizeHa,  setFarmSizeHa]  = useState("");
+  const [cropMonth, setCropMonth] = useState("6");
+  const [duration, setDuration] = useState("");
+  const [farmSizeHa, setFarmSizeHa] = useState("");
 
   /* ── submission ── */
   const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState(null);
-  const [result,  setResult]  = useState(null);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
 
   /* ── geocode status ── */
   const [geocodeStatus, setGeocodeStatus] = useState("idle");
-  const [geocodeHint,   setGeocodeHint]   = useState("");
+  const [geocodeHint, setGeocodeHint] = useState("");
   const geocodeRequestId = useRef(0);
 
   /* ── 1. Check backend geocode status ─────────────────────────────── */
@@ -233,7 +239,7 @@ export default function PredictionPage() {
   useEffect(() => {
     if (locationMode !== "details" || addressDetailMode !== "free") return;
     const q = locationDetails.trim();
-    if (!q)       { setGeocodeStatus("idle");  setGeocodeHint(""); return; }
+    if (!q) { setGeocodeStatus("idle"); setGeocodeHint(""); return; }
     if (q.length < 3) { setGeocodeStatus("short"); setGeocodeHint(""); return; }
     setGeocodeStatus("loading"); setGeocodeHint("");
     const myId = ++geocodeRequestId.current;
@@ -298,19 +304,19 @@ export default function PredictionPage() {
     e.preventDefault();
     setError(null); setResult(null);
 
-    const ph  = Number(soilPh);
-    const n   = Number(nitrogen);
-    const p   = Number(phosphorus);
-    const k   = Number(potassium);
+    const ph = Number(soilPh);
+    const n = Number(nitrogen);
+    const p = Number(phosphorus);
+    const k = Number(potassium);
     const mon = Number(cropMonth);
     const dur = Number(duration);
 
     if (!Number.isFinite(ph) || ph < 0 || ph > 14) { setError("Soil pH must be between 0 and 14."); return; }
-    if (!Number.isFinite(n)  || n < 0)              { setError("Nitrogen must be a non-negative number."); return; }
-    if (!Number.isFinite(p)  || p < 0)              { setError("Phosphorus must be a non-negative number."); return; }
-    if (!Number.isFinite(k)  || k < 0)              { setError("Potassium must be a non-negative number."); return; }
+    if (!Number.isFinite(n) || n < 0) { setError("Nitrogen must be a non-negative number."); return; }
+    if (!Number.isFinite(p) || p < 0) { setError("Phosphorus must be a non-negative number."); return; }
+    if (!Number.isFinite(k) || k < 0) { setError("Potassium must be a non-negative number."); return; }
     if (!Number.isFinite(mon) || mon < 1 || mon > 12) { setError("Select a valid crop month."); return; }
-    if (!Number.isFinite(dur) || dur <= 0)           { setError("Duration must be a positive number of days."); return; }
+    if (!Number.isFinite(dur) || dur <= 0) { setError("Duration must be a positive number of days."); return; }
 
     let locationPayload;
     if (locationMode === "map") {
@@ -366,16 +372,16 @@ export default function PredictionPage() {
 
   /* ── geo banner ──────────────────────────────────────────────────── */
   const geoBannerText =
-    geoStatus === "requesting"  ? t("📡 Detecting your location…") :
-    geoStatus === "granted"     ? t("📍 Location detected — coordinates set automatically.") :
-    geoStatus === "denied"      ? t("🔒 Location blocked. Click the lock icon in the address bar → Site settings → Location → Allow, then refresh.") :
-    null;
+    geoStatus === "requesting" ? t("📡 Detecting your location…") :
+      geoStatus === "granted" ? t("📍 Location detected — coordinates set automatically.") :
+        geoStatus === "denied" ? t("🔒 Location blocked. Click the lock icon in the address bar → Site settings → Location → Allow, then refresh.") :
+          null;
 
   const geoBannerColor =
-    geoStatus === "granted"    ? "bg-green-50 border-green-300 text-green-800" :
-    geoStatus === "denied"     ? "bg-amber-50 border-amber-300 text-amber-800" :
-    geoStatus === "requesting" ? "bg-blue-50  border-blue-200  text-blue-800"  :
-    "bg-gray-50 border-gray-200 text-gray-700";
+    geoStatus === "granted" ? "bg-green-50 border-green-300 text-green-800" :
+      geoStatus === "denied" ? "bg-amber-50 border-amber-300 text-amber-800" :
+        geoStatus === "requesting" ? "bg-blue-50  border-blue-200  text-blue-800" :
+          "bg-gray-50 border-gray-200 text-gray-700";
 
   /* ── result speech text — full sidebar narration ────────────────── */
   const resultSpeechText = (() => {
@@ -431,7 +437,7 @@ export default function PredictionPage() {
       <Navbar />
 
       {/* ── top bar ── */}
-      
+
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="mb-8 max-w-2xl">
@@ -470,11 +476,10 @@ export default function PredictionPage() {
                     key={mode}
                     type="button"
                     onClick={() => { setLocationMode(mode); setGeocodeStatus("idle"); setGeocodeHint(""); }}
-                    className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
-                      locationMode === mode
-                        ? "bg-green-700 text-white shadow-sm"
-                        : "text-gray-600 hover:bg-white/80 hover:text-gray-900"
-                    }`}
+                    className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${locationMode === mode
+                      ? "bg-green-700 text-white shadow-sm"
+                      : "text-gray-600 hover:bg-white/80 hover:text-gray-900"
+                      }`}
                   >
                     {mode === "map" ? t("Map & pin") : t("Location details")}
                   </button>
@@ -524,9 +529,8 @@ export default function PredictionPage() {
                         key={mode}
                         type="button"
                         onClick={() => { setAddressDetailMode(mode); setGeocodeStatus("idle"); setGeocodeHint(""); }}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                          addressDetailMode === mode ? "bg-green-700 text-white shadow-sm" : "text-gray-600 hover:bg-white/80"
-                        }`}
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${addressDetailMode === mode ? "bg-green-700 text-white shadow-sm" : "text-gray-600 hover:bg-white/80"
+                          }`}
                       >
                         {mode === "free" ? "Type address" : "State / district / village / PIN"}
                       </button>
@@ -576,12 +580,12 @@ export default function PredictionPage() {
                           )}
                         </div>
                       ) : (
-                        <FieldRow label="District" hint="Required if PIN is not filled" voiceProps={{ ...vp(() => {}), onResult: (v) => setStructuredDistrictText(v) }}>
+                        <FieldRow label="District" hint="Required if PIN is not filled" voiceProps={{ ...vp(() => { }), onResult: (v) => setStructuredDistrictText(v) }}>
                           <input type="text" value={structuredDistrictText} onChange={(e) => setStructuredDistrictText(e.target.value)} placeholder="District name" className={inputClass} />
                         </FieldRow>
                       )}
 
-                      <FieldRow label="Village / locality" voiceProps={{ ...vp(() => {}), onResult: (v) => setStructuredVillage(v) }}>
+                      <FieldRow label="Village / locality" voiceProps={{ ...vp(() => { }), onResult: (v) => setStructuredVillage(v) }}>
                         <input type="text" value={structuredVillage} onChange={(e) => setStructuredVillage(e.target.value)} placeholder="e.g. village or locality name" className={inputClass} />
                       </FieldRow>
 
@@ -686,7 +690,6 @@ export default function PredictionPage() {
             )}
 
             <div className="flex flex-col gap-3 border-t border-green-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-gray-500">All inputs are sent to your prediction API.</p>
               <button
                 type="submit"
                 disabled={loading}
@@ -710,9 +713,19 @@ export default function PredictionPage() {
                 {/* ── Recommended crop ── */}
                 <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-5">
                   <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("Recommended crop")}</p>
-                  <p className="mt-2 text-3xl font-bold text-gray-900 capitalize">
-                    {getCropInfo(result.recommendedCrop)?.emoji || "🌾"} {result.recommendedCrop || "—"}
-                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold text-gray-900 capitalize">
+                    <div className="flex items-center gap-2">
+                      <img src={getCropInfo(result.recommendedCrop)?.zoomedImage} alt={result.recommendedCrop} className="w-10 h-10" />
+                      <span>{result.recommendedCrop || "—"}</span>
+                    </div>
+                    <Link
+                      to={cropDetailPageUrl(result.recommendedCrop)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-green-300 hover:text-green-700"
+                      aria-label={`View details for ${result.recommendedCrop}`}
+                    >
+                      <HiOutlineInformationCircle className="h-5 w-5" />
+                    </Link>
+                  </div>
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
                       <span>{t("Confidence")}</span>
@@ -758,10 +771,10 @@ export default function PredictionPage() {
                     <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mb-3">📦 Estimated Yield</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { val: result.yield.yield_q_ha,    unit: "q/ha",    label: "per hectare" },
-                        { val: result.yield.total_yield_q, unit: "quintals",label: `on ${result.yield.farm_size_ha} ha` },
-                        { val: result.yield.yield_kg_ha,   unit: "kg/ha",   label: "per hectare" },
-                        { val: result.yield.total_yield_kg,unit: "kg total",label: `on ${result.yield.farm_size_ha} ha` },
+                        { val: result.yield.yield_q_ha, unit: "q/ha", label: "per hectare" },
+                        { val: result.yield.total_yield_q, unit: "quintals", label: `on ${result.yield.farm_size_ha} ha` },
+                        { val: result.yield.yield_kg_ha, unit: "kg/ha", label: "per hectare" },
+                        { val: result.yield.total_yield_kg, unit: "kg total", label: `on ${result.yield.farm_size_ha} ha` },
                       ].map(({ val, unit, label }) => (
                         <div key={unit} className="bg-white rounded-lg p-2.5 border border-emerald-100 text-center">
                           <div className="text-base font-bold text-emerald-700">{val}</div>
@@ -812,10 +825,10 @@ export default function PredictionPage() {
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">🌱 Growing Guide</p>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {[
-                          { label: "Season",    value: info.season },
-                          { label: "Water",     value: info.water },
-                          { label: "Ideal pH",  value: info.ph },
-                          { label: "Duration",  value: `${info.days} days` },
+                          { label: "Season", value: info.season },
+                          { label: "Water", value: info.water },
+                          { label: "Ideal pH", value: info.ph },
+                          { label: "Duration", value: `${info.days} days` },
                         ].map(({ label, value }) => (
                           <div key={label} className="bg-white rounded-lg p-2 border border-gray-100">
                             <div className="text-gray-400 font-medium">{label}</div>
@@ -836,10 +849,18 @@ export default function PredictionPage() {
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">🔁 Alternatives</p>
                     <div className="space-y-2">
                       {result.top3.slice(1).map((alt) => (
-                        <div key={alt.crop} className="flex items-center justify-between text-sm">
-                          <span className="capitalize text-gray-700">
-                            {getCropInfo(alt.crop)?.emoji || "🌾"} {alt.crop}
-                          </span>
+                        <div key={alt.crop} className="flex items-center justify-between gap-3 text-sm">
+                          <div className="flex items-center gap-2 capitalize text-gray-700">
+                            <img src={getCropInfo(alt.crop)?.image} alt={alt.crop} className="w-5 h-5" />
+                            <span>{alt.crop}</span>
+                            <Link
+                              to={cropDetailPageUrl(alt.crop)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-green-300 hover:text-green-700"
+                              aria-label={`View details for ${alt.crop}`}
+                            >
+                              <HiOutlineInformationCircle className="h-4 w-4" />
+                            </Link>
+                          </div>
                           <span className="text-xs font-semibold text-gray-500">{Math.round(alt.confidence * 100)}%</span>
                         </div>
                       ))}
@@ -853,11 +874,11 @@ export default function PredictionPage() {
                     type="button"
                     onClick={() => navigate("/profit", {
                       state: {
-                        mlInput:         result.mlInput,
-                        top3:            result.top3,
-                        farmSizeHa:      result.yield?.farm_size_ha || 1,
+                        mlInput: result.mlInput,
+                        top3: result.top3,
+                        farmSizeHa: result.yield?.farm_size_ha || 1,
                         recommendedCrop: result.recommendedCrop,
-                        duration:        Number(duration) || 90,
+                        duration: Number(duration) || 90,
                       }
                     })}
                     className="w-full flex items-center justify-center gap-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 text-sm transition shadow-md"
