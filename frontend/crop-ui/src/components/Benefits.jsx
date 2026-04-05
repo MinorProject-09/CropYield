@@ -12,20 +12,20 @@ const benefits = [
 function Benefits() {
   const { t } = useLanguage();
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-white dark:bg-slate-900">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <span className="text-green-700 text-sm font-semibold uppercase tracking-widest">{t("Why Farmers Choose Us")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">{t("Real benefits, real results")}</h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">{t("Designed with Indian farmers in mind — practical, fast, and free to use.")}</p>
+          <span className="text-green-700 text-sm font-semibold uppercase tracking-widest dark:text-green-400">{t("Why Farmers Choose Us")}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 dark:text-slate-100">{t("Real benefits, real results")}</h2>
+          <p className="text-gray-500 mt-3 max-w-xl mx-auto dark:text-slate-400">{t("Designed with Indian farmers in mind — practical, fast, and free to use.")}</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {benefits.map((b) => (
-            <div key={b.titleKey} className="flex gap-4 p-6 rounded-2xl bg-green-50 border border-green-100">
+            <div key={b.titleKey} className="flex gap-4 p-6 rounded-2xl bg-green-50 border border-green-100 dark:bg-slate-800/80 dark:border-emerald-900/40">
               <div className="text-3xl flex-shrink-0">{b.icon}</div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">{t(b.titleKey)}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{t(b.descKey)}</p>
+                <h3 className="font-semibold text-gray-900 mb-1 dark:text-slate-100">{t(b.titleKey)}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed dark:text-slate-400">{t(b.descKey)}</p>
               </div>
             </div>
           ))}

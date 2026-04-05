@@ -12,9 +12,9 @@ const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov
 
 function Badge({ children, color = "green" }) {
   const colors = {
-    green: "bg-green-100 text-green-800 border-green-200",
-    amber: "bg-amber-100 text-amber-800 border-amber-200",
-    blue:  "bg-blue-100 text-blue-800 border-blue-200",
+    green: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700",
+    amber: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700",
+    blue:  "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${colors[color]}`}>
@@ -28,10 +28,10 @@ function ConfidenceBar({ value }) {
   const color = pct >= 75 ? "bg-green-500" : pct >= 50 ? "bg-amber-400" : "bg-red-400";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden dark:bg-slate-700">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-semibold text-gray-600 w-9 text-right">{pct}%</span>
+      <span className="text-xs font-semibold text-gray-600 w-9 text-right dark:text-slate-400">{pct}%</span>
     </div>
   );
 }
@@ -61,29 +61,29 @@ function OverviewTab({ history, historyLoading }) {
      
 
       {/* Daily tip */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start dark:bg-amber-950/30 dark:border-amber-800">
         <span className="text-2xl">{tip.icon}</span>
         <div>
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Farming Tip of the Day</p>
-          <p className="text-gray-700 text-sm leading-relaxed">{tip.tip}</p>
+          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1 dark:text-amber-400">Farming Tip of the Day</p>
+          <p className="text-gray-700 text-sm leading-relaxed dark:text-slate-300">{tip.tip}</p>
         </div>
       </div>
 
       {/* Last prediction */}
       {historyLoading ? (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-400 text-sm">Loading history…</div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-400 text-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500">Loading history…</div>
       ) : lastPrediction ? (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm dark:bg-slate-800 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">Last Prediction</h3>
-            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">New prediction →</Link>
+            <h3 className="font-semibold text-gray-900 dark:text-slate-100">Last Prediction</h3>
+            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline dark:text-green-400">New prediction →</Link>
           </div>
           <div className="flex items-center gap-4">
             <img src={getCropInfo(lastPrediction.recommendedCrop)?.image} alt={lastPrediction.recommendedCrop} className="w-16 h-16" />
             <div className="flex-1">
-              <p className="text-xl font-bold text-green-800 capitalize">{lastPrediction.recommendedCrop}</p>
+              <p className="text-xl font-bold text-green-800 capitalize dark:text-green-400">{lastPrediction.recommendedCrop}</p>
               <ConfidenceBar value={lastPrediction.confidence} />
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-400 mt-1 dark:text-slate-500">
                 {new Date(lastPrediction.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                 {lastPrediction.location?.details ? ` · ${lastPrediction.location.details}` : ""}
               </p>
@@ -91,9 +91,9 @@ function OverviewTab({ history, historyLoading }) {
           </div>
         </div>
       ) : (
-        <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center">
+        <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center dark:bg-slate-800 dark:border-slate-600">
           <p className="text-3xl mb-2">🌱</p>
-          <p className="text-gray-500 text-sm mb-4">No predictions yet. Run your first one!</p>
+          <p className="text-gray-500 text-sm mb-4 dark:text-slate-400">No predictions yet. Run your first one!</p>
           <Link to="/prediction">
             <button className="bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-green-800 transition">
               Start Prediction →
@@ -145,9 +145,9 @@ function HistoryTab({ history, loading, onDelete }) {
     return (
       <div className="space-y-3">
         {[1,2,3].map(i => (
-          <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 animate-pulse">
-            <div className="h-4 bg-gray-100 rounded w-1/3 mb-2" />
-            <div className="h-3 bg-gray-100 rounded w-1/2" />
+          <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 animate-pulse dark:bg-slate-800 dark:border-slate-700">
+            <div className="h-4 bg-gray-100 rounded w-1/3 mb-2 dark:bg-slate-600" />
+            <div className="h-3 bg-gray-100 rounded w-1/2 dark:bg-slate-600" />
           </div>
         ))}
       </div>
@@ -156,9 +156,9 @@ function HistoryTab({ history, loading, onDelete }) {
 
   if (!history?.length) {
     return (
-      <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center">
+      <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-12 text-center dark:bg-slate-800 dark:border-slate-600">
         <p className="text-4xl mb-3">📋</p>
-        <p className="text-gray-500 text-sm mb-4">No prediction history yet.</p>
+        <p className="text-gray-500 text-sm mb-4 dark:text-slate-400">No prediction history yet.</p>
         <Link to="/prediction">
           <button className="bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-green-800 transition">
             Make Your First Prediction →
@@ -174,7 +174,7 @@ function HistoryTab({ history, loading, onDelete }) {
       <div className="flex justify-end">
         <button
           onClick={exportCSV}
-          className="flex items-center gap-2 text-xs font-semibold text-green-700 border border-green-200 bg-white px-4 py-2 rounded-xl hover:bg-green-50 transition"
+          className="flex items-center gap-2 text-xs font-semibold text-green-700 border border-green-200 bg-white px-4 py-2 rounded-xl hover:bg-green-50 transition dark:border-slate-600 dark:bg-slate-800 dark:text-green-400 dark:hover:bg-slate-700"
         >
           ⬇ Export CSV
         </button>
@@ -185,21 +185,21 @@ function HistoryTab({ history, loading, onDelete }) {
         const location = p.location?.details || (p.location?.latitude ? `${Number(p.location.latitude).toFixed(2)}°, ${Number(p.location.longitude).toFixed(2)}°` : "—");
         const info = getCropInfo(p.recommendedCrop);
         return (
-          <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-green-200 transition">
+          <div key={p._id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-green-200 transition dark:bg-slate-800 dark:border-slate-700 dark:hover:border-emerald-800">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0 dark:bg-slate-700 dark:border-slate-600">
                 <img src={info?.image} alt={p.recommendedCrop} className="w-8 h-8 rounded" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="font-semibold text-gray-900 capitalize">{p.recommendedCrop}</span>
+                  <span className="font-semibold text-gray-900 capitalize dark:text-slate-100">{p.recommendedCrop}</span>
                   <Badge color={p.confidence >= 0.75 ? "green" : p.confidence >= 0.5 ? "amber" : "blue"}>
                     {Math.round(p.confidence * 100)}% confidence
                   </Badge>
                   {info?.season && <Badge color="blue">{info.season}</Badge>}
                 </div>
                 <ConfidenceBar value={p.confidence} />
-                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-gray-500 dark:text-slate-400">
                   <span>📍 {location}</span>
                   <span>📅 {month} · {p.duration}d</span>
                   <span>🧪 pH {p.soilPh} · N{p.nitrogen} P{p.phosphorus} K{p.potassium}</span>
@@ -271,13 +271,13 @@ function ProfileTab({ user, setUser }) {
     }
   };
 
-  const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition bg-white";
+  const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/40";
   const selectCls = `${inputCls} appearance-none`;
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 py-5 flex items-center gap-4">
+      <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 py-5 flex items-center gap-4 dark:from-slate-800 dark:to-slate-800">
         <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl font-bold text-white">
           {user?.name?.[0]?.toUpperCase() || "?"}
         </div>
@@ -298,26 +298,26 @@ function ProfileTab({ user, setUser }) {
         <div className="grid sm:grid-cols-2 gap-5">
           {/* Name */}
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Full Name</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">Full Name</label>
             <input name="name" value={form.name} onChange={handleChange} className={inputCls} placeholder="Your name" required />
           </div>
 
           {/* Email — read only */}
           <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Email</label>
-            <input value={user?.email || ""} readOnly className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`} />
-            <p className="text-xs text-gray-400 mt-1">Email cannot be changed.</p>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">Email</label>
+            <input value={user?.email || ""} readOnly className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-slate-900/50`} />
+            <p className="text-xs text-gray-400 mt-1 dark:text-slate-500">Email cannot be changed.</p>
           </div>
 
           {/* Farm Size */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Farm Size (hectares)</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">Farm Size (hectares)</label>
             <input name="farmSize" type="number" min="0" step="0.1" value={form.farmSize} onChange={handleChange} className={inputCls} placeholder="e.g. 12.5" />
           </div>
 
           {/* Soil Type */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Soil Type</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">Soil Type</label>
             <div className="relative">
               <select name="soilType" value={form.soilType} onChange={handleChange} className={selectCls}>
                 <option value="">Select soil type</option>
@@ -329,7 +329,7 @@ function ProfileTab({ user, setUser }) {
 
           {/* State */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">State / UT</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">State / UT</label>
             <div className="relative">
               <select name="state" value={form.state} onChange={handleChange} className={selectCls}>
                 <option value="">Select state</option>
@@ -341,7 +341,7 @@ function ProfileTab({ user, setUser }) {
 
           {/* District */}
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">District</label>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 dark:text-slate-400">District</label>
             {districts.length > 0 ? (
               <div className="relative">
                 <select name="district" value={form.district} onChange={handleChange} className={selectCls}>
@@ -356,8 +356,8 @@ function ProfileTab({ user, setUser }) {
           </div>
         </div>
 
-        {error   && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">⚠ {error}</p>}
-        {success && <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5">✓ {success}</p>}
+        {error   && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 dark:bg-red-950/40 dark:border-red-800 dark:text-red-400">⚠ {error}</p>}
+        {success && <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">✓ {success}</p>}
 
         <div className="flex justify-end pt-2">
           <button
@@ -403,10 +403,10 @@ export default function Dashboard() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-50 dark:bg-slate-950">
 
         {/* Hero */}
-        <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+        <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10 dark:from-slate-900 dark:to-slate-800">
           <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
             <div>
               <p className="text-green-300 text-sm mb-1">Dashboard</p>
@@ -420,7 +420,7 @@ export default function Dashboard() {
               </p>
             </div>
             <Link to="/prediction">
-              <button className="bg-white text-green-800 font-bold px-5 py-2.5 rounded-xl hover:bg-green-50 transition shadow text-sm">
+              <button className="bg-white text-green-800 font-bold px-5 py-2.5 rounded-xl hover:bg-green-50 transition shadow text-sm dark:bg-slate-100 dark:hover:bg-white">
                 🌾 New Prediction →
               </button>
             </Link>
@@ -429,20 +429,20 @@ export default function Dashboard() {
 
         <div className="max-w-5xl mx-auto px-6 py-8">
           {/* Tabs */}
-          <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-6 w-fit shadow-sm">
+          <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-6 w-fit shadow-sm dark:bg-slate-800 dark:border-slate-700">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   activeTab === tab.id
-                    ? "bg-green-700 text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                    ? "bg-green-700 text-white shadow-sm dark:bg-emerald-700"
+                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-50 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-700"
                 }`}
               >
                 {tab.label}
                 {tab.id === "history" && history.length > 0 && (
-                  <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === "history" ? "bg-white/20 text-white" : "bg-green-100 text-green-700"}`}>
+                  <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === "history" ? "bg-white/20 text-white" : "bg-green-100 text-green-700 dark:bg-slate-600 dark:text-emerald-300"}`}>
                     {history.length}
                   </span>
                 )}

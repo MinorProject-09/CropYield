@@ -49,7 +49,7 @@ function Navbar() {
         />
       )}
 
-      <nav className="sticky top-0 z-40 flex justify-between items-center px-6 py-3 bg-green-800 text-white shadow-md">
+      <nav className="sticky top-0 z-40 flex justify-between items-center px-6 py-3 bg-green-800 text-white shadow-md dark:bg-slate-950 dark:border-b dark:border-slate-800 dark:shadow-black/40">
         <Link to="/" className="flex items-center gap-2 text-xl font-bold hover:opacity-90">
           <span className="text-2xl">🌾</span>
           <span>CropYield AI</span>

@@ -125,15 +125,15 @@ export default function Chatbot() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-green-600 to-emerald-800 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition flex items-center justify-center text-2xl border-2 border-white/20"
+        className="fixed bottom-6 right-6 z-50 bg-gradient-to-br from-green-600 to-emerald-800 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition flex items-center justify-center text-2xl border-2 border-white/20 dark:border-slate-600 dark:shadow-emerald-950/50"
         aria-label="Open farming assistant"
       >
         🌾
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[min(100vw-1.5rem,22rem)] bg-white rounded-2xl shadow-2xl border border-green-100 flex flex-col overflow-hidden max-h-[min(85vh,28rem)]">
-          <div className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-700 text-white px-4 py-3 shrink-0">
+        <div className="fixed bottom-24 right-6 z-50 w-[min(100vw-1.5rem,22rem)] bg-white rounded-2xl shadow-2xl border border-green-100 flex flex-col overflow-hidden max-h-[min(85vh,28rem)] dark:bg-slate-900 dark:border-slate-700 dark:shadow-black/40">
+          <div className="bg-gradient-to-r from-green-700 via-green-600 to-emerald-700 text-white px-4 py-3 shrink-0 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900">
             <div className="font-semibold text-sm tracking-wide">
               {t("CropYield Assistant")}
             </div>
@@ -142,11 +142,11 @@ export default function Chatbot() {
             </p>
           </div>
 
-          <div className="flex-1 min-h-[12rem] max-h-[18rem] overflow-y-auto p-3 space-y-2.5 text-sm bg-gradient-to-b from-green-50/50 to-white">
+          <div className="flex-1 min-h-[12rem] max-h-[18rem] overflow-y-auto p-3 space-y-2.5 text-sm bg-gradient-to-b from-green-50/50 to-white dark:from-slate-900 dark:to-slate-900">
             {chat.length === 0 && (
-              <div className="rounded-xl bg-white/90 border border-green-100 p-3 text-gray-600 text-xs leading-relaxed shadow-sm">
-                <p className="font-medium text-green-800 mb-1">Try asking:</p>
-                <ul className="list-disc pl-4 space-y-1 text-gray-600">
+              <div className="rounded-xl bg-white/90 border border-green-100 p-3 text-gray-600 text-xs leading-relaxed shadow-sm dark:bg-slate-800/90 dark:border-slate-600 dark:text-slate-300">
+                <p className="font-medium text-green-800 mb-1 dark:text-green-400">Try asking:</p>
+                <ul className="list-disc pl-4 space-y-1 text-gray-600 dark:text-slate-400">
                   <li>{t("My soil pH is 6.5 and I have 3 acres. Which crop will be best?")}</li>
                   <li>{t("Black soil in Maharashtra, 5 acres, borewell water: suggest best crop and rough profit.")}</li>
                 </ul>
@@ -160,8 +160,8 @@ export default function Chatbot() {
                 <div
                   className={`px-3 py-2 rounded-2xl max-w-[88%] text-[13px] leading-snug shadow-sm ${
                     c.type === "user"
-                      ? "bg-green-600 text-white rounded-br-md"
-                      : "bg-white border border-gray-100 text-gray-800 rounded-bl-md"
+                      ? "bg-green-600 text-white rounded-br-md dark:bg-emerald-700"
+                      : "bg-white border border-gray-100 text-gray-800 rounded-bl-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
                   } whitespace-pre-wrap`}
                 >
                   {renderInlineMarkdown(c.text)}
@@ -169,16 +169,16 @@ export default function Chatbot() {
               </div>
             ))}
             {loading && (
-              <p className="text-xs text-green-600/80 pl-1">{t("Thinking…")}</p>
+              <p className="text-xs text-green-600/80 pl-1 dark:text-emerald-400/90">{t("Thinking…")}</p>
             )}
           </div>
 
           {attachments.length > 0 && (
-            <div className="px-2 pt-2 flex flex-wrap gap-1 border-t border-green-50 bg-white">
+            <div className="px-2 pt-2 flex flex-wrap gap-1 border-t border-green-50 bg-white dark:border-slate-700 dark:bg-slate-900">
               {attachments.map((f, i) => (
                 <span
                   key={`${f.name}-${i}`}
-                  className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-800 px-2 py-0.5 rounded-full border border-green-100 max-w-full"
+                  className="inline-flex items-center gap-1 text-[10px] bg-green-50 text-green-800 px-2 py-0.5 rounded-full border border-green-100 max-w-full dark:bg-slate-800 dark:text-emerald-200 dark:border-slate-600"
                 >
                   <span className="truncate max-w-[140px]">{f.name}</span>
                   <button
@@ -194,7 +194,7 @@ export default function Chatbot() {
             </div>
           )}
 
-          <div className="flex border-t border-green-100 bg-white p-1.5 gap-1 shrink-0 items-center">
+          <div className="flex border-t border-green-100 bg-white p-1.5 gap-1 shrink-0 items-center dark:border-slate-700 dark:bg-slate-900">
             <VoiceInput
               speechCode={speechCode || "hi-IN"}
               disabled={loading}
@@ -208,7 +208,7 @@ export default function Chatbot() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={loading || attachments.length >= MAX_FILES}
-              className="shrink-0 h-9 w-9 rounded-xl border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center text-lg"
+              className="shrink-0 h-9 w-9 rounded-xl border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center text-lg dark:border-slate-600 dark:bg-slate-800 dark:text-emerald-300 dark:hover:bg-slate-700"
               title={t("Attach file")}
               aria-label={t("Attach file")}
             >
@@ -220,7 +220,7 @@ export default function Chatbot() {
               onKeyDown={onKeyDown}
               placeholder={t("Region, soil, water, farm size, goals…")}
               disabled={loading}
-              className="flex-1 min-w-0 px-3 py-2.5 text-sm outline-none rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-200 disabled:opacity-60"
+              className="flex-1 min-w-0 px-3 py-2.5 text-sm outline-none rounded-xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-200 disabled:opacity-60 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:bg-slate-800 dark:focus:ring-emerald-700/50"
             />
             <button
               type="button"

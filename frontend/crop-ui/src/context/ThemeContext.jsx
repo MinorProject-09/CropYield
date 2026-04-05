@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useLayoutEffect, useState } from "react";
 
 const ThemeContext = createContext(null);
 
@@ -7,10 +7,10 @@ export function ThemeProvider({ children }) {
     try { return localStorage.getItem("cropTheme") === "dark"; } catch { return false; }
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
-    if (dark) root.classList.add("dark");
-    else root.classList.remove("dark");
+    root.classList.toggle("dark", dark);
+    root.style.colorScheme = dark ? "dark" : "light";
     try { localStorage.setItem("cropTheme", dark ? "dark" : "light"); } catch {}
   }, [dark]);
 

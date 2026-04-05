@@ -11,7 +11,7 @@ Focus on:
 - Encourage soil testing, local extension services, and verified seed sources.
 
 Farmer-friendly style rules:
-- Reply in the SAME language/script as the user message (Hindi/Marathi/Punjabi/Tamil/Telugu/Bengali/Gujarati/Kannada/Malayalam/Odia/English, etc.).
+- Language is controlled by the "APP LANGUAGE" block in each request (the user's UI language). Follow that block exactly. Do not choose the reply language from the user's message unless the APP LANGUAGE block says otherwise.
 - Use very simple words. Avoid technical jargon unless you explain it in 1 short line.
 - Keep answers short and practical: "What to do now", "Why", "Expected result/risk".
 - Prefer Indian context: acre/hectare, mandi rates, monsoon timing, local irrigation reality, seed/fertilizer availability.
@@ -118,13 +118,34 @@ async function fileToParts(file) {
   ];
 }
 
-async function buildUserParts(message, lang, langLabel, files) {
-  const preferredLanguageInstruction =
-    lang && lang !== "en"
-      ? `Respond in ${langLabel || lang} language only, using simple words.`
-      : "Respond in simple English.";
+function appLanguageBlock(lang, langLabel) {
+  const code = String(lang || "en").toLowerCase().trim();
+  const label =
+    langLabel ||
+    (code === "en" ? "English" : code);
 
-  let promptWithInstruction = `${SYSTEM_INSTRUCTION}\n${preferredLanguageInstruction}\n\nUser request:\n${message}`;
+  if (code === "en") {
+    return [
+      "=== APP LANGUAGE (MANDATORY) ===",
+      "The farmer selected English in the app language menu.",
+      "Write your ENTIRE reply in English only (Latin script).",
+      "Do not use Hindi, Devanagari, Urdu script, or any other script for explanations.",
+      "If the user's message is in another language, still answer in English unless they explicitly ask for another language.",
+    ].join("\n");
+  }
+
+  return [
+    "=== APP LANGUAGE (MANDATORY) ===",
+    `The farmer selected "${label}" (code: ${code}) in the app language menu.`,
+    `Write your ENTIRE reply ONLY in ${label}, using the correct native script for that language.`,
+    "Do not default to Hindi or English unless the user explicitly asks for it in their message.",
+  ].join("\n");
+}
+
+async function buildUserParts(message, lang, langLabel, files) {
+  const langBlock = appLanguageBlock(lang, langLabel);
+
+  let promptWithInstruction = `${SYSTEM_INSTRUCTION}\n\n${langBlock}\n\nUser request:\n${message}`;
 
   if (files && files.length) {
     promptWithInstruction += `\n\n(The user attached ${files.length} file(s). Use them if helpful.)`;
@@ -181,8 +202,13 @@ async function generateWithGemini(apiKey, userParts) {
 
 exports.chat = async (req, res) => {
   try {
-    const { message: rawMessage, lang, langLabel } = req.body || {};
+    const { message: rawMessage, lang: rawLang, langLabel: rawLangLabel } = req.body || {};
     const files = req.files || [];
+
+    const lang = String(rawLang || "en").toLowerCase().trim() || "en";
+    const langLabel =
+      String(rawLangLabel || "").trim() ||
+      (lang === "en" ? "English" : lang);
 
     let message = String(rawMessage || "").trim();
     if (!message && files.length) {

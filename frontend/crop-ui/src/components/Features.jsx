@@ -12,19 +12,19 @@ const features = [
 function Features() {
   const { t } = useLanguage();
   return (
-    <section id="features" className="py-20 px-6 bg-white">
+    <section id="features" className="py-20 px-6 bg-white dark:bg-slate-900">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <span className="text-green-700 text-sm font-semibold uppercase tracking-widest">{t("What We Offer")}</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">{t("Everything a farmer needs")}</h2>
-          <p className="text-gray-500 mt-3 max-w-xl mx-auto">{t("Built specifically for Indian agriculture — from soil types to regional crops.")}</p>
+          <span className="text-green-700 text-sm font-semibold uppercase tracking-widest dark:text-green-400">{t("What We Offer")}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 dark:text-slate-100">{t("Everything a farmer needs")}</h2>
+          <p className="text-gray-500 mt-3 max-w-xl mx-auto dark:text-slate-400">{t("Built specifically for Indian agriculture — from soil types to regional crops.")}</p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f.titleKey} className="group p-6 rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition bg-gray-50 hover:bg-white">
+            <div key={f.titleKey} className="group p-6 rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition bg-gray-50 hover:bg-white dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800 dark:hover:border-green-700/50">
               <div className="text-3xl mb-4">{f.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{t(f.titleKey)}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{t(f.descKey)}</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 dark:text-slate-100">{t(f.titleKey)}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed dark:text-slate-400">{t(f.descKey)}</p>
             </div>
           ))}
         </div>
