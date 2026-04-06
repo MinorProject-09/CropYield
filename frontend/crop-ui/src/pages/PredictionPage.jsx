@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   HiOutlineBeaker,
   HiOutlineCalendarDays,
@@ -16,6 +16,7 @@ import SoilHealthCard from "../components/SoilHealthCard";
 import PestAlertCard from "../components/PestAlertCard";
 import CropGuideModal from "../components/CropGuideModal";
 import { useLanguage } from "../i18n/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
@@ -83,7 +84,9 @@ async function checkGeoPermission() {
 
 export default function PredictionPage() {
   const { t, speechCode } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const routerLocation = useLocation();
 
   /* ── location ── */
   const [locationMode, setLocationMode] = useState("map");
@@ -130,6 +133,33 @@ export default function PredictionPage() {
     getGeocodeStatus()
       .then(({ data }) => setGoogleConfigured(!!data.googleConfigured))
       .catch(() => setGoogleConfigured(false));
+  }, []);
+
+  /* ── 1b. Auto-fill from farmer profile ───────────────────────────── */
+  useEffect(() => {
+    if (!user) return;
+    // Pre-fill farm size from profile if not already set
+    if (user.farmSize && !farmSizeHa) {
+      setFarmSizeHa(String(user.farmSize));
+    }
+    // Pre-fill state from profile for structured address mode
+    if (user.location?.state && !structuredState) {
+      setStructuredState(user.location.state);
+      setAddressDetailMode("structured");
+      setLocationMode("details");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  /* ── 1c. Auto-fill from IoT sensor data (navigated from /iot) ────── */
+  useEffect(() => {
+    const prefill = routerLocation?.state?.prefill;
+    if (!prefill) return;
+    if (prefill.soilPh       != null) setSoilPh(String(prefill.soilPh));
+    if (prefill.nitrogen     != null) setNitrogen(String(prefill.nitrogen));
+    if (prefill.phosphorus   != null) setPhosphorus(String(prefill.phosphorus));
+    if (prefill.potassium    != null) setPotassium(String(prefill.potassium));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ── 2. Auto-geolocation on mount ────────────────────────────────── */
@@ -449,7 +479,37 @@ export default function PredictionPage() {
           </p>
         </div>
 
-        {/* Geo banner */}
+        {/* Personalized profile banner */}
+        {user && (user.farmSize || user.soilType || user.location?.state) && (          <div className="mb-6 rounded-xl border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 px-4 py-3 flex items-center gap-3 flex-wrap">
+            <span className="text-lg">👤</span>
+            <div className="flex-1 text-sm text-green-800 dark:text-green-300">
+              <span className="font-semibold">{t("Using your profile")}: </span>
+              {user.farmSize && <span className="mr-3">📐 {user.farmSize} ha</span>}
+              {user.soilType && <span className="mr-3">🧱 {user.soilType}</span>}
+              {user.location?.state && <span className="mr-3">📍 {user.location.state}{user.location.district ? `, ${user.location.district}` : ""}</span>}
+            </div>
+            <Link to="/dashboard" className="text-xs text-green-700 dark:text-green-400 font-semibold hover:underline flex-shrink-0">
+              {t("Edit Profile")} →
+            </Link>
+          </div>
+        )}
+
+        {/* IoT sensor data banner */}
+        {routerLocation?.state?.prefill && (
+          <div className="mb-4 rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 px-4 py-3 flex items-center gap-3 flex-wrap">
+            <span className="text-lg">📡</span>
+            <div className="flex-1 text-sm text-blue-800 dark:text-blue-300">
+              <span className="font-semibold">{t("Soil data pre-filled from IoT sensor")}: </span>
+              {routerLocation.state.prefill.soilPh       != null && <span className="mr-3">pH {routerLocation.state.prefill.soilPh}</span>}
+              {routerLocation.state.prefill.nitrogen     != null && <span className="mr-3">N {routerLocation.state.prefill.nitrogen}</span>}
+              {routerLocation.state.prefill.phosphorus   != null && <span className="mr-3">P {routerLocation.state.prefill.phosphorus}</span>}
+              {routerLocation.state.prefill.potassium    != null && <span className="mr-3">K {routerLocation.state.prefill.potassium}</span>}
+            </div>
+            <Link to="/iot" className="text-xs text-blue-700 dark:text-blue-400 font-semibold hover:underline flex-shrink-0">
+              {t("View Sensor Dashboard")} →
+            </Link>
+          </div>
+        )}
         {geoBannerText && (
           <div className={`mb-6 rounded-xl border px-4 py-3 text-sm ${geoBannerColor}`}>
             {geoBannerText}

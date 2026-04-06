@@ -59,6 +59,11 @@ function Navbar() {
         <div className="space-x-6 hidden md:flex text-sm font-medium">
           <Link to="/" className="hover:text-green-200 transition">{t("Home")}</Link>
           {user && <Link to="/prediction" className="hover:text-green-200 transition">{t("Prediction")}</Link>}
+          {user && <Link to="/market" className="hover:text-green-200 transition">{t("Market")}</Link>}
+          {user && <Link to="/weather" className="hover:text-green-200 transition">{t("Weather")}</Link>}
+          {user && <Link to="/community" className="hover:text-green-200 transition">{t("Community")}</Link>}
+          {user && <Link to="/iot" className="hover:text-green-200 transition">{t("IoT")}</Link>}
+          {user && <Link to="/schemes" className="hover:text-green-200 transition">{t("Schemes")}</Link>}
           {user && <Link to="/calendar" className="hover:text-green-200 transition">{t("Calendar")}</Link>}
           {user && <Link to="/dashboard" className="hover:text-green-200 transition">{t("Dashboard")}</Link>}
         </div>
@@ -75,9 +80,7 @@ function Navbar() {
           <LanguageSwitcher />
           {user ? (
             <>
-              <span className="hidden md:block text-sm text-green-200 mr-1">
-                {t("Hi")}, {user.name?.split(" ")[0]}
-              </span>
+              
               <button
                 type="button"
                 onClick={() => setShowLogout(true)}
