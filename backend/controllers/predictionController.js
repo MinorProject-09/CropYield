@@ -265,6 +265,26 @@ exports.deletePrediction = async (req, res) => {
   }
 };
 
+exports.updateHarvest = async (req, res) => {
+  try {
+    const { actualYieldQ, harvestNotes } = req.body;
+    if (actualYieldQ == null || isNaN(Number(actualYieldQ))) {
+      return res.status(400).json({ message: "actualYieldQ must be a number" });
+    }
+    const prediction = await Prediction.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!prediction) return res.status(404).json({ message: "Prediction not found" });
+
+    prediction.actualYieldQ  = Number(actualYieldQ);
+    prediction.harvestNotes  = typeof harvestNotes === "string" ? harvestNotes.trim() : "";
+    prediction.harvestedAt   = new Date();
+    await prediction.save();
+
+    res.json({ message: "Harvest logged", prediction });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getProfitRank = async (req, res) => {
   try {
     const { candidates, N, P, K, temperature, humidity, ph, rainfall, farm_size_ha, duration_days } = req.body;
