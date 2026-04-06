@@ -702,8 +702,7 @@ export default function PredictionPage() {
 
           {/* ══ RESULT SIDEBAR ══════════════════════════════════════════════ */}
           <aside className="space-y-4 rounded-2xl border border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-lg lg:sticky lg:top-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">{t("Result")}</h3> 
-
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">{t("Result")}</h3>
             {!result ? (
               <div className="rounded-xl border border-dashed border-green-200 bg-green-50/50 p-6 text-center text-sm text-gray-600">
                 {t("Submit the form to see the recommended crop.")}
@@ -727,8 +726,7 @@ export default function PredictionPage() {
                       title="View farming guide"
                     >
                       <HiOutlineInformationCircle className="h-5 w-5" />
-                    </Link>
-                    <VoiceSpeaker text={resultSpeechText} label={t("Read aloud")} speechCode={speechCode} />
+                    </button>
               
                   </div>
                   <div className="mt-3">
@@ -770,6 +768,7 @@ export default function PredictionPage() {
                   </div>
                 )}
 
+                <VoiceSpeaker text={resultSpeechText} label={t("Read result aloud")} speechCode={speechCode} />
                 {/* ── Yield estimation ── */}
                 {result.yield?.available && (
                   <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 p-4">
@@ -905,7 +904,6 @@ export default function PredictionPage() {
                   >
                     📊 {t("See Profit Analysis for Top 3 Crops →")}
                   </button>
-                  
                 )}
 
               </div>
