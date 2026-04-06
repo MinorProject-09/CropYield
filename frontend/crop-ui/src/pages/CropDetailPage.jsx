@@ -123,8 +123,9 @@ export default function CropDetailPage() {
 
           <div className="w-full sm:w-auto sm:max-w-sm rounded-3xl border border-green-200 bg-white p-5 shadow-lg">
 
-            <div className="flex items-center justify-center gap-4 text-xl font-bold text-gray-900">
+            <div className="flex items-center justify-around gap-4 text-xl font-bold text-gray-900">
               <span className="capitalize">{decodedCrop || t("Crop Details")}</span>
+              <VoiceSpeaker text={resultSpeechText} label={t("Read details aloud")} speechCode={speechCode} />
             </div>
             <p className="mt-4 px-2 text-center text-sm font-medium leading-relaxed text-gray-500">
               {info
@@ -132,7 +133,6 @@ export default function CropDetailPage() {
                 : t("Detailed guide for this crop is not available yet. Explore other crops or return to prediction.")}
             </p>
           </div>
-          <VoiceSpeaker text={resultSpeechText} label={t("Read details aloud")} speechCode={speechCode} />
 
         </div>
 
