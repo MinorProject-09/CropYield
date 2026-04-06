@@ -124,7 +124,7 @@ export const CROP_INFO = {
     notes: "Ensure balanced NPK application and stage-wise irrigation during tasseling and grain filling."
   },
   chickpea: {
-    image: "/images/chickpea.jpg",
+    image: "/images/cropImages/chickpea.jpg",
     zoomedImage: "/images/zoomedImages/chickpea.jpg",
     season: "Rabi",
     water: "Low",
@@ -200,7 +200,7 @@ export const CROP_INFO = {
     notes: "Provide support for climbing types and avoid waterlogging to prevent root rot."
   },
   "pigeon peas": {
-    image: "/image/cropImagess/pigeon peas.jpg",
+    image: "/image/cropImages/pigeon peas.jpg",
     zoomedImage: "/images/zoomedImages/pigeon peas.jpg",
     season: "Kharif",
     water: "Low",
