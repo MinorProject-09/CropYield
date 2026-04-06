@@ -9,6 +9,7 @@ import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { getCropInfo } from "../data/cropInfo";
 import { MSP_2024 } from "../data/mspData";
 import YieldTracker from "../components/YieldTracker";
+import FarmAdvisor from "../components/FarmAdvisor";
 
 const SOIL_TYPES = ["Sandy", "Loamy", "Clay", "Silt", "Peaty", "Chalky", "Sandy Loam", "Clay Loam", "Other"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -48,7 +49,7 @@ const TABS = [
 ];
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
-function OverviewTab({ history, historyLoading }) {
+function OverviewTab({ user, history, historyLoading }) {
   const { t } = useLanguage();
   const tips = [
     { icon: "💧", tip: "Check soil moisture before sowing — over-watering reduces yield by up to 20%." },
@@ -58,7 +59,6 @@ function OverviewTab({ history, historyLoading }) {
     { icon: "📅", tip: "Sow Rabi crops (wheat, mustard) between October and December for best results." },
   ];
   const tip = tips[new Date().getDay() % tips.length];
-  const lastPrediction = history?.[0];
 
   return (
     <div className="space-y-6">
@@ -78,6 +78,9 @@ function OverviewTab({ history, historyLoading }) {
         ))}
       </div>
 
+      {/* Personalized farm advisor */}
+      <FarmAdvisor user={user} history={history} />
+
       {/* Daily tip */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
         <span className="text-2xl">{tip.icon}</span>
@@ -86,39 +89,6 @@ function OverviewTab({ history, historyLoading }) {
           <p className="text-gray-700 text-sm leading-relaxed">{t(tip.tip)}</p>
         </div>
       </div>
-
-      {/* Last prediction */}
-      {historyLoading ? (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-gray-400 text-sm">{t("Loading history…")}</div>
-      ) : lastPrediction ? (
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-900">{t("Last Prediction")}</h3>
-            <Link to="/prediction" className="text-xs text-green-700 font-semibold hover:underline">{t("New prediction →")}</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-4xl">{getCropInfo(lastPrediction.recommendedCrop)?.emoji || "🌾"}</div>
-            <div className="flex-1">
-              <p className="text-xl font-bold text-green-800 capitalize">{lastPrediction.recommendedCrop}</p>
-              <ConfidenceBar value={lastPrediction.confidence} />
-              <p className="text-xs text-gray-400 mt-1">
-                {new Date(lastPrediction.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                {lastPrediction.location?.details ? ` · ${lastPrediction.location.details}` : ""}
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center">
-          <p className="text-3xl mb-2">🌱</p>
-          <p className="text-gray-500 text-sm mb-4">{t("No predictions yet. Run your first one!")}</p>
-          <Link to="/prediction">
-            <button className="bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-green-800 transition">
-              {t("Start Prediction →")}
-            </button>
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
@@ -564,7 +534,7 @@ export default function Dashboard() {
           </div>
 
           {/* Tab content */}
-          {activeTab === "overview" && <OverviewTab history={history} historyLoading={historyLoading} />}
+          {activeTab === "overview" && <OverviewTab user={user} history={history} historyLoading={historyLoading} />}
           {activeTab === "history"  && <HistoryTab  history={history} loading={historyLoading} onDelete={handleDelete} setHistory={setHistory} />}
           {activeTab === "msp"      && <MSPTab />}
           {activeTab === "profile"  && <ProfileTab  user={user} setUser={setUser} />}
