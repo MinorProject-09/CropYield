@@ -73,8 +73,17 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">{t("Email")}</label>
-            <input id="email" type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
+            <label htmlFor="email">{t("Email or Username")}</label>
+            <input
+              id="email"
+              type="text"
+              name="email"
+              placeholder="you@example.com or your username"
+              value={form.email}
+              onChange={handleChange}
+              required
+              autoComplete="username"
+            />
           </div>
           <div className="form-group">
             <label htmlFor="password">{t("Password")}</label>

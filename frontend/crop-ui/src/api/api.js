@@ -48,11 +48,13 @@ export function getGeocodeStatus() {
 export default api;
 
 // ── Sensor / IoT API ──────────────────────────────────────────────────────────
-export const postSensorReading = (data)           => api.post("/api/sensor", data);
-export const getSensorLatest   = ()               => api.get("/api/sensor/latest");
-export const getSensorHistory  = (deviceId, limit)=> api.get("/api/sensor/history", { params: { deviceId, limit } });
-export const getSensorAlerts   = ()               => api.get("/api/sensor/alerts");
-export const deleteSensorReading = (id)           => api.delete(`/api/sensor/${id}`);
+export const postSensorReading      = (data)            => api.post("/api/sensor", data);
+export const getSensorLatest        = ()                => api.get("/api/sensor/latest");
+export const getSensorHistory       = (deviceId, limit) => api.get("/api/sensor/history", { params: { deviceId, limit } });
+export const getSensorAlerts        = ()                => api.get("/api/sensor/alerts");
+export const deleteSensorReading    = (id)              => api.delete(`/api/sensor/${id}`);
+export const getSensorDeviceKey     = ()                => api.get("/api/sensor/device-key");
+export const regenerateSensorDeviceKey = ()             => api.post("/api/sensor/device-key/regenerate");
 
 // ── Weather API ───────────────────────────────────────────────────────────────
 export const getWeatherForecast = (lat, lng) =>

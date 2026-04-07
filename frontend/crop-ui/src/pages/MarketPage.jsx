@@ -378,7 +378,7 @@ export default function MarketPage() {
             <SeasonalChart monthlyPrices={bestTime.monthlyPrices} currentMonthNum={currentMonthNum} t={t} />
 
             {/* Mandi price list */}
-            <div>
+            {/* <div>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
                   🏪 {t("Mandi Prices")} — {prices.prices?.length} {t("markets")}
@@ -393,8 +393,8 @@ export default function MarketPage() {
                 {prices.prices?.map((p, i) => (
                   <MandiCard key={`${p.market}-${i}`} price={p} rank={i} msp={prices.msp} t={t} />
                 ))}
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
 
             {/* Data source note */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-2xl p-4 text-xs text-blue-700 dark:text-blue-400 space-y-1">

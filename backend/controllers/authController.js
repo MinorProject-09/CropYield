@@ -125,7 +125,13 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Accept email or username in the email field
+    const identifier = (email || "").trim();
+    const isEmail = identifier.includes("@");
+    const user = isEmail
+      ? await User.findOne({ email: identifier })
+      : await User.findOne({ name: identifier });
+
     if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -139,7 +145,7 @@ exports.login = async (req, res) => {
       return res.status(403).json({
         message: "Please verify your email before logging in.",
         requiresVerification: true,
-        email,
+        email: user.email,
       });
     }
 
