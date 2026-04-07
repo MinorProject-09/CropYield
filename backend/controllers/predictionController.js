@@ -18,6 +18,9 @@ async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 8000) {
       data = text
     }
     return { ok: res.ok, status: res.status, data }
+  } catch (err) {
+    console.error(`Fetch error for ${url}:`, err.message)
+    return { ok: false, status: 500, data: null, error: err.message }
   } finally {
     clearTimeout(timeout)
   }
@@ -113,21 +116,20 @@ exports.predictCropYield = async (req, res) => {
       fetchJsonWithTimeout(climateRainfallUrl, { method: "GET" }, 10000),
     ])
 
+    let temperature = 25.0; // fallback
+    let humidity = 60.0;    // fallback
+
     if (!weatherResp.ok || !weatherResp.data?.current) {
-      return res.status(502).json({
-        message: "Failed to fetch weather data",
-        detail: weatherResp.data,
-      })
-    }
-
-    const temperature = Number(weatherResp.data.current.temperature_2m)
-    const humidity    = Number(weatherResp.data.current.relative_humidity_2m)
-
-    if (![temperature, humidity].every(Number.isFinite)) {
-      return res.status(502).json({
-        message: "Weather provider returned invalid temperature/humidity",
-        detail: weatherResp.data?.current ?? null,
-      })
+      console.warn("Using fallback weather data due to API failure");
+    } else {
+      const tempNum = Number(weatherResp.data.current.temperature_2m);
+      const humNum  = Number(weatherResp.data.current.relative_humidity_2m);
+      if (Number.isFinite(tempNum) && Number.isFinite(humNum)) {
+        temperature = tempNum;
+        humidity = humNum;
+      } else {
+        console.warn("Weather provider returned invalid temperature/humidity. Using fallbacks.");
+      }
     }
 
     // Compute average monthly rainfall = annual / 12, clamped to dataset range 20–298mm

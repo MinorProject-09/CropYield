@@ -5,8 +5,7 @@ const passport = require("passport");
 const session = require("express-session");
 require("dotenv").config();
 
-const dns = require('node:dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']); // Force Google and Cloudflare DNS
+// Removed dns.setServers to allow native DNS resolution to work with fetch
 
 // ✅ Fail fast on missing env vars
 const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"];
