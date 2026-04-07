@@ -3,10 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const stats = [
-  { value: "94%", labelKey: "Prediction Accuracy" },
-  { value: "12+", labelKey: "Crop Types Supported" },
-  { value: "28",  labelKey: "Indian States Covered" },
-  { value: "10K+",labelKey: "Farmers Empowered" },
+  { value: "92%", labelKey: "Prediction Accuracy" },
+  { value: "21+", labelKey: "Crop Types Supported" },
+  { value: "",labelKey: "Farmers Empowered" },
 ];
 
 function Hero() {

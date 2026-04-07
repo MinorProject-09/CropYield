@@ -92,54 +92,55 @@ exports.predictCropYield = async (req, res) => {
     }
 
     // ── Weather from Open-Meteo ───────────────────────────────────────────────
-    // temperature + humidity: current conditions from forecast API
-    // rainfall: dataset 'rainfall' column = average monthly rainfall (annual/12)
-    //   Verified by cross-referencing dataset values with known Indian crop regions:
-    //   rice=236mm/mo (implied 2834mm/yr), muskmelon=25mm/mo (296mm/yr), etc.
-    //   We fetch annual rainfall from the ERA5 climate normals API and divide by 12.
-    //   This gives stable, location-representative values that match the training data.
+    // The dataset's "rainfall" column = long-term average monthly rainfall (mm/month).
+    // We must NOT use recent/seasonal data — a dry-season query would give near-zero
+    // for a high-rainfall region. Instead we fetch the full past year from the
+    // historical archive API and compute annual_total / 12 = monthly average.
+    // This matches the dataset's scale (20–298 mm/month) regardless of query season.
 
     const currentWeatherUrl =
       `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}` +
       `&longitude=${encodeURIComponent(lng)}` +
-      `&current=temperature_2m,relative_humidity_2m`
+      `&current=temperature_2m,relative_humidity_2m&timezone=auto`
 
-    // ERA5 climate normals — annual precipitation sum for the location
-    const climateRainfallUrl =
-      `https://climate-api.open-meteo.com/v1/climate?` +
-      `latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lng)}` +
-      `&models=EC_Earth3P_HR&daily=precipitation_sum` +
-      `&start_date=2000-01-01&end_date=2000-12-31`
+    // Historical archive: full previous calendar year for annual rainfall average
+    const now = new Date();
+    const prevYear = now.getFullYear() - 1;
+    const archiveUrl =
+      `https://archive-api.open-meteo.com/v1/archive?latitude=${encodeURIComponent(lat)}` +
+      `&longitude=${encodeURIComponent(lng)}` +
+      `&start_date=${prevYear}-01-01&end_date=${prevYear}-12-31` +
+      `&daily=precipitation_sum&timezone=auto`
 
-    const [weatherResp, climateResp] = await Promise.all([
+    const [weatherResp, archiveResp] = await Promise.all([
       fetchJsonWithTimeout(currentWeatherUrl, { method: "GET" }, 8000),
-      fetchJsonWithTimeout(climateRainfallUrl, { method: "GET" }, 10000),
+      fetchJsonWithTimeout(archiveUrl, { method: "GET" }, 10000),
     ])
 
     let temperature = 29.05; // fallback
     let humidity = 66.67;    // fallback
+    let rainfall = 103.5;    // fallback = dataset overall mean
 
     if (!weatherResp.ok || !weatherResp.data?.current) {
       console.warn("Using fallback weather data due to API failure");
     } else {
       const tempNum = Number(weatherResp.data.current.temperature_2m);
       const humNum  = Number(weatherResp.data.current.relative_humidity_2m);
-      if (Number.isFinite(tempNum) && Number.isFinite(humNum)) {
-        temperature = tempNum;
-        humidity = humNum;
-      } else {
-        console.warn("Weather provider returned invalid temperature/humidity. Using fallbacks.");
-      }
+      if (Number.isFinite(tempNum)) temperature = tempNum;
+      else console.warn("Weather provider returned invalid temperature. Using fallback.");
+      if (Number.isFinite(humNum)) humidity = humNum;
+      else console.warn("Weather provider returned invalid humidity. Using fallback.");
     }
 
-    // Compute average monthly rainfall = annual / 12, clamped to dataset range 20–298mm
-    let rainfall = 120 // fallback near dataset mean
-    if (climateResp.ok && Array.isArray(climateResp.data?.daily?.precipitation_sum)) {
-      const annualSum = climateResp.data.daily.precipitation_sum
-        .reduce((acc, v) => acc + (Number(v) || 0), 0)
-      const monthlyAvg = annualSum / 12
-      rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10))
-      rainfall=69.09
+    // Annual total / 12 = monthly average — matches dataset scale exactly
+    if (archiveResp.ok && Array.isArray(archiveResp.data?.daily?.precipitation_sum)) {
+      const precipArr = archiveResp.data.daily.precipitation_sum;
+      const annualTotal = precipArr.reduce((acc, v) => acc + (Number(v) || 0), 0);
+      const monthlyAvg = annualTotal / 12;
+      rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10));
+      console.log(`Rainfall for (${lat},${lng}): annual=${annualTotal.toFixed(1)}mm → monthly avg=${rainfall}mm`);
+    } else {
+      console.warn("Archive API failed, using fallback rainfall:", archiveResp.data?.reason || "unknown");
     }
 
     // ML payload — key order matches train.py: N, P, K, temperature, humidity, ph, rainfall

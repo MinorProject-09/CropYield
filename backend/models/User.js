@@ -62,7 +62,10 @@ const UserSchema = new mongoose.Schema(
   },
 
   passwordResetToken: { type: String },
-  passwordResetExpires: { type: Date }
+  passwordResetExpires: { type: Date },
+
+  // IoT device authentication key
+  deviceKey: { type: String, sparse: true }
 
 },
 { timestamps: true }
