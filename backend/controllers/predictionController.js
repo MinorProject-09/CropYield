@@ -116,8 +116,8 @@ exports.predictCropYield = async (req, res) => {
       fetchJsonWithTimeout(climateRainfallUrl, { method: "GET" }, 10000),
     ])
 
-    let temperature = 25.0; // fallback
-    let humidity = 60.0;    // fallback
+    let temperature = 29.05; // fallback
+    let humidity = 66.67;    // fallback
 
     if (!weatherResp.ok || !weatherResp.data?.current) {
       console.warn("Using fallback weather data due to API failure");
@@ -133,12 +133,13 @@ exports.predictCropYield = async (req, res) => {
     }
 
     // Compute average monthly rainfall = annual / 12, clamped to dataset range 20–298mm
-    let rainfall = 100 // fallback near dataset mean
+    let rainfall = 120 // fallback near dataset mean
     if (climateResp.ok && Array.isArray(climateResp.data?.daily?.precipitation_sum)) {
       const annualSum = climateResp.data.daily.precipitation_sum
         .reduce((acc, v) => acc + (Number(v) || 0), 0)
       const monthlyAvg = annualSum / 12
       rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10))
+      rainfall=69.09
     }
 
     // ML payload — key order matches train.py: N, P, K, temperature, humidity, ph, rainfall
