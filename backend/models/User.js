@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema(
 
   role: {
     type: String,
-    enum: ["farmer", "admin"],
+    enum: ["farmer", "admin", "agronomist"],
     default: "farmer"
   },
 
@@ -65,7 +65,22 @@ const UserSchema = new mongoose.Schema(
   passwordResetExpires: { type: Date },
 
   // IoT device authentication key
-  deviceKey: { type: String, sparse: true }
+  deviceKey: { type: String, sparse: true },
+
+  // Alert preferences
+  phone:     { type: String, default: "" },
+  smsAlerts: { type: Boolean, default: false },
+
+  // Farm fields (multiple plots)
+  fields: [{
+    name:      { type: String, default: "Field" },
+    crop:      { type: String, default: "" },
+    areaHa:    { type: Number, default: 1 },
+    lat:       { type: Number },
+    lng:       { type: Number },
+    sowDate:   { type: String, default: "" },
+    color:     { type: String, default: "#22c55e" },
+  }],
 
 },
 { timestamps: true }

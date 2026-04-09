@@ -16,6 +16,7 @@ router.post("/reset-password", authController.resetPassword);
 
 router.get("/me", authMiddleware, authController.getMe);
 router.put("/profile", authMiddleware, authController.updateProfile);
+router.put("/fields",  authMiddleware, authController.saveFields);
 
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 router.get(

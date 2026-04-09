@@ -52,6 +52,9 @@ exports.createPost = async (req, res) => {
     if (!title?.trim() || !body?.trim()) {
       return res.status(400).json({ message: "Title and body are required" });
     }
+    // Images uploaded via multer (up to 3)
+    const images = (req.files || []).map(f => `/uploads/community/${f.filename}`);
+
     const post = await Post.create({
       author:     req.user._id,
       authorName: req.user.name || "Farmer",
@@ -59,6 +62,7 @@ exports.createPost = async (req, res) => {
       body:       body.trim().slice(0, 3000),
       crop:       (crop || "").toLowerCase().trim(),
       tags:       Array.isArray(tags) ? tags.map(t => t.toLowerCase().trim()).filter(Boolean) : [],
+      images,
     });
     res.status(201).json({ post });
   } catch (err) {
@@ -96,19 +100,26 @@ exports.addAnswer = async (req, res) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // Count how many answers this user has given across all posts
-    const answerCount = await Post.countDocuments({
-      "answers.author": req.user._id,
-    });
+    const answerCount = await Post.countDocuments({ "answers.author": req.user._id });
     const isExpert = answerCount >= 5;
+    const isAgronomist = req.user.role === "agronomist";
 
     post.answers.push({
-      author:     req.user._id,
-      authorName: req.user.name || "Farmer",
-      body:       body.trim().slice(0, 2000),
+      author:       req.user._id,
+      authorName:   req.user.name || "Farmer",
+      body:         body.trim().slice(0, 2000),
       isExpert,
+      isAgronomist,
     });
     await post.save();
+
+    // Notify post author (not if they answered their own post)
+    if (post.author.toString() !== req.user._id.toString()) {
+      const { createAnswerNotification } = require("./notificationController");
+      const io = req.app.get("io");
+      await createAnswerNotification(io, post.author, req.user.name || "A farmer", post._id, post.title);
+    }
+
     res.status(201).json({ post });
   } catch (err) {
     res.status(500).json({ message: err.message });

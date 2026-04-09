@@ -1,0 +1,52 @@
+/* ── CropYield AI — Global Design Tokens ─────────────────────────────────── */
+:root {
+  --brand-50:  #f0fdf4;
+  --brand-100: #dcfce7;
+  --brand-600: #16a34a;
+  --brand-700: #15803d;
+  --brand-800: #166534;
+  --brand-900: #14532d;
+  --brand-950: #052e16;
+  --surface:   #f8faf8;
+  --card:      #ffffff;
+  --border:    #e5e7eb;
+  --text-1:    #111827;
+  --text-2:    #6b7280;
+  --text-3:    #9ca3af;
+  --radius-xl: 1rem;
+  --radius-2xl:1.25rem;
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / .06), 0 1px 2px -1px rgb(0 0 0 / .06);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / .07), 0 2px 4px -2px rgb(0 0 0 / .07);
+}
+
+.dark {
+  --surface:   #0d1117;
+  --card:      #161b22;
+  --border:    #30363d;
+  --text-1:    #e6edf3;
+  --text-2:    #8b949e;
+  --text-3:    #484f58;
+}
+
+/* Smooth page transitions */
+* { box-sizing: border-box; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb { background: #374151; }
+
+/* Focus ring */
+:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }
+
+/* Page fade-in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: fadeUp 0.35s ease both; }
+
+/* Card hover lift */
+.card-hover { transition: box-shadow 0.2s, transform 0.2s; }
+.card-hover:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
