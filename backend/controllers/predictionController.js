@@ -91,57 +91,65 @@ exports.predictCropYield = async (req, res) => {
       return res.status(400).json({ message: "latitude and longitude are required to query weather + ML model" })
     }
 
-    // ── Weather from Open-Meteo ───────────────────────────────────────────────
-    // The dataset's "rainfall" column = long-term average monthly rainfall (mm/month).
-    // We must NOT use recent/seasonal data — a dry-season query would give near-zero
-    // for a high-rainfall region. Instead we fetch the full past year from the
-    // historical archive API and compute annual_total / 12 = monthly average.
-    // This matches the dataset's scale (20–298 mm/month) regardless of query season.
+    // ── Weather from OpenWeatherMap ───────────────────────────────────────────
+    // Current weather → temperature & humidity.
+    // 5-day/3-hour forecast (40 slots) → sum precipitation across all slots
+    // and scale to a monthly average to match the dataset's rainfall column
+    // (long-term monthly average, 20–298 mm/month).
+
+    const OWM_KEY = process.env.OPENWEATHER_API_KEY;
+    const OWM_BASE = "https://api.openweathermap.org/data/2.5";
+
+    if (!OWM_KEY) {
+      return res.status(503).json({ message: "OPENWEATHER_API_KEY is not configured on the server." });
+    }
 
     const currentWeatherUrl =
-      `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}` +
-      `&longitude=${encodeURIComponent(lng)}` +
-      `&current=temperature_2m,relative_humidity_2m&timezone=auto`
+      `${OWM_BASE}/weather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&units=metric&appid=${OWM_KEY}`;
 
-    // Historical archive: full previous calendar year for annual rainfall average
-    const now = new Date();
-    const prevYear = now.getFullYear() - 1;
-    const archiveUrl =
-      `https://archive-api.open-meteo.com/v1/archive?latitude=${encodeURIComponent(lat)}` +
-      `&longitude=${encodeURIComponent(lng)}` +
-      `&start_date=${prevYear}-01-01&end_date=${prevYear}-12-31` +
-      `&daily=precipitation_sum&timezone=auto`
+    // 40 slots × 3 h = 120 h ≈ 5 days of precipitation data
+    const forecastUrl =
+      `${OWM_BASE}/forecast?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&units=metric&cnt=40&appid=${OWM_KEY}`;
 
-    const [weatherResp, archiveResp] = await Promise.all([
+    const [weatherResp, forecastResp] = await Promise.all([
       fetchJsonWithTimeout(currentWeatherUrl, { method: "GET" }, 8000),
-      fetchJsonWithTimeout(archiveUrl, { method: "GET" }, 10000),
+      fetchJsonWithTimeout(forecastUrl, { method: "GET" }, 8000),
     ])
 
-    let temperature = 29.05; // fallback
-    let humidity = 66.67;    // fallback
-    let rainfall = 103.5;    // fallback = dataset overall mean
-
-    if (!weatherResp.ok || !weatherResp.data?.current) {
-      console.warn("Using fallback weather data due to API failure");
-    } else {
-      const tempNum = Number(weatherResp.data.current.temperature_2m);
-      const humNum  = Number(weatherResp.data.current.relative_humidity_2m);
-      if (Number.isFinite(tempNum)) temperature = tempNum;
-      else console.warn("Weather provider returned invalid temperature. Using fallback.");
-      if (Number.isFinite(humNum)) humidity = humNum;
-      else console.warn("Weather provider returned invalid humidity. Using fallback.");
+    // Require real weather data — no silent fallbacks
+    if (!weatherResp.ok || !weatherResp.data?.main) {
+      const reason = weatherResp.data?.message || weatherResp.error || "unknown error";
+      console.error("OWM current weather failed:", reason);
+      return res.status(502).json({
+        message: `Failed to fetch real-time weather data for the given location: ${reason}`,
+      });
     }
 
-    // Annual total / 12 = monthly average — matches dataset scale exactly
-    if (archiveResp.ok && Array.isArray(archiveResp.data?.daily?.precipitation_sum)) {
-      const precipArr = archiveResp.data.daily.precipitation_sum;
-      const annualTotal = precipArr.reduce((acc, v) => acc + (Number(v) || 0), 0);
-      const monthlyAvg = annualTotal / 12;
-      rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10));
-      console.log(`Rainfall for (${lat},${lng}): annual=${annualTotal.toFixed(1)}mm → monthly avg=${rainfall}mm`);
-    } else {
-      console.warn("Archive API failed, using fallback rainfall:", archiveResp.data?.reason || "unknown");
+    const temperature = Number(weatherResp.data.main.temp);
+    const humidity    = Number(weatherResp.data.main.humidity);
+
+    if (!Number.isFinite(temperature) || !Number.isFinite(humidity)) {
+      return res.status(502).json({
+        message: "OpenWeatherMap returned invalid temperature or humidity values.",
+      });
     }
+
+    // Sum 5-day forecast precipitation and scale to monthly average.
+    // 5 days → multiply by (30 / 5) = 6 to approximate a 30-day month.
+    if (!forecastResp.ok || !Array.isArray(forecastResp.data?.list)) {
+      const reason = forecastResp.data?.message || forecastResp.error || "unknown error";
+      console.error("OWM forecast failed:", reason);
+      return res.status(502).json({
+        message: `Failed to fetch rainfall forecast for the given location: ${reason}`,
+      });
+    }
+
+    const fiveDay = forecastResp.data.list.reduce(
+      (acc, slot) => acc + (slot.rain?.["3h"] || 0), 0
+    );
+    const monthlyAvg = fiveDay * 6; // scale 5-day total → ~monthly
+    const rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10));
+    console.log(`Weather for (${lat},${lng}): temp=${temperature}°C, humidity=${humidity}%, 5-day rain=${fiveDay.toFixed(1)}mm → monthly est=${rainfall}mm`);
 
     // ML payload — key order matches train.py: N, P, K, temperature, humidity, ph, rainfall
     const mlPayload = {
