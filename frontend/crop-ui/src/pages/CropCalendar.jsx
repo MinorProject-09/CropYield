@@ -27,16 +27,16 @@ const CALENDAR = [
 ];
 
 const SEASON_COLORS = {
-  Kharif:    "bg-green-100 text-green-800 border-green-200",
+  Kharif:    "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700",
   Rabi:      "bg-blue-100 text-blue-800 border-blue-200",
   Zaid:      "bg-amber-100 text-amber-800 border-amber-200",
   Perennial: "bg-purple-100 text-purple-800 border-purple-200",
 };
 
 const WATER_COLORS = {
-  High:   "text-blue-600",
-  Medium: "text-amber-600",
-  Low:    "text-green-600",
+  High:   "text-blue-600 dark:text-blue-400",
+  Medium: "text-amber-600 dark:text-amber-400",
+  Low:    "text-emerald-600 dark:text-emerald-400",
 };
 
 export default function CropCalendar() {
@@ -44,12 +44,12 @@ export default function CropCalendar() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50 dark:bg-slate-900">
-        <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+      <main className="min-h-screen bg-page">
+        <div className="bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] text-white px-6 py-10">
           <div className="max-w-5xl mx-auto">
-            <p className="text-green-300 text-sm mb-1">📅 {t("Seasonal Guide")}</p>
+            <p className="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-2">📅 {t("Seasonal Guide")}</p>
             <h1 className="text-2xl md:text-3xl font-bold mb-1">{t("Crop Calendar")}</h1>
-            <p className="text-green-200 text-sm">{t("Sowing and harvesting schedule for all 22 supported crops.")}</p>
+            <p className="text-emerald-200/80 text-sm">{t("Sowing and harvesting schedule for all 22 supported crops.")}</p>
           </div>
         </div>
 
@@ -62,7 +62,7 @@ export default function CropCalendar() {
 
           <div className="grid gap-3">
             {CALENDAR.map((c) => (
-              <div key={c.crop} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:border-green-200 transition">
+              <div key={c.crop} className="bg-white border border-gray-100 rounded-2xl p-5  hover:border-emerald-200 dark:hover:border-emerald-700 hover:shadow-md transition">
                 <div className="flex items-start gap-4">
                   <div className="w-30 p-2 flex justify-center">
                     <img src={c.image} alt={c.crop} className="w-auto h-20 flex-shrink-0" />
@@ -73,19 +73,19 @@ export default function CropCalendar() {
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${SEASON_COLORS[c.season]}`}>{t(c.season)}</span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs mb-2">
-                      <div className="bg-green-50 rounded-lg p-2">
+                      <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-lg p-2">
                         <div className="text-gray-400 font-medium mb-0.5">🌱 {t("Sow")}</div>
                         <div className="font-semibold text-gray-800">{c.sow}</div>
                       </div>
-                      <div className="bg-amber-50 rounded-lg p-2">
+                      <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2">
                         <div className="text-gray-400 font-medium mb-0.5">🌾 {t("Harvest")}</div>
                         <div className="font-semibold text-gray-800">{c.harvest}</div>
                       </div>
-                      <div className="bg-blue-50 rounded-lg p-2">
+                      <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2">
                         <div className="text-gray-400 font-medium mb-0.5">⏱ {t("Duration")}</div>
                         <div className="font-semibold text-gray-800">{c.duration}</div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="bg-gray-50 dark:bg-slate-700/40 rounded-lg p-2">
                         <div className="text-gray-400 font-medium mb-0.5">💧 {t("Water")}</div>
                         <div className={`font-semibold ${WATER_COLORS[c.water]}`}>{t(c.water)}</div>
                       </div>

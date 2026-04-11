@@ -40,7 +40,7 @@ function timeAgo(date) {
 function Avatar({ name, size = "sm" }) {
   const sz = size === "sm" ? "w-7 h-7 text-xs" : "w-9 h-9 text-sm";
   return (
-    <div className={`${sz} rounded-full bg-green-700 text-white font-bold flex items-center justify-center flex-shrink-0`}>
+    <div className={`${sz} rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center flex-shrink-0`}>
       {(name || "F")[0].toUpperCase()}
     </div>
   );
@@ -50,14 +50,14 @@ function Avatar({ name, size = "sm" }) {
 function PostCard({ post, currentUserId, onUpvote, onDelete, onClick, t }) {
   const upvoted = post.upvotedBy?.includes(currentUserId);
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:border-green-200 dark:hover:border-green-700 transition cursor-pointer"
+    <div className="card rounded-2xl p-5  hover:border-green-200 dark:hover:border-green-700 transition cursor-pointer"
       onClick={() => onClick(post._id)}>
       <div className="flex items-start gap-3">
         {/* Upvote column */}
         <div className="flex flex-col items-center gap-1 flex-shrink-0 pt-0.5"
           onClick={e => { e.stopPropagation(); onUpvote(post._id); }}>
           <button type="button"
-            className={`text-lg leading-none transition ${upvoted ? "text-green-600 dark:text-green-400" : "text-gray-300 dark:text-slate-600 hover:text-green-500"}`}>
+            className={`text-lg leading-none transition ${upvoted ? "text-emerald-600 dark:text-emerald-400" : "text-gray-300 dark:text-slate-600 hover:text-green-500"}`}>
             ▲
           </button>
           <span className="text-xs font-bold text-gray-600 dark:text-slate-400">{post.upvotes}</span>
@@ -106,6 +106,15 @@ function PostCard({ post, currentUserId, onUpvote, onDelete, onClick, t }) {
               </button>
             )}
           </div>
+          {/* Images thumbnail strip */}
+          {post.images?.length > 0 && (
+            <div className="flex gap-1.5 mt-2" onClick={e => e.stopPropagation()}>
+              {post.images.map((src, i) => (
+                <img key={i} src={src} alt="" className="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-slate-700 cursor-pointer hover:opacity-90 transition"
+                  onClick={() => window.open(src, "_blank")} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -162,12 +171,12 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
   return (
     <div className="space-y-6">
       <button type="button" onClick={onBack}
-        className="text-sm text-green-700 dark:text-green-400 font-semibold hover:underline flex items-center gap-1">
+        className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold hover:underline flex items-center gap-1">
         ← {t("Back to Forum")}
       </button>
 
       {/* Question */}
-      <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+      <div className="card rounded-2xl p-6 ">
         <div className="flex items-start gap-3">
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
             <span className="text-lg text-gray-300 dark:text-slate-600">▲</span>
@@ -202,7 +211,7 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
           {(post.answers || [])
             .sort((a, b) => b.upvotes - a.upvotes)
             .map(ans => (
-            <div key={ans._id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+            <div key={ans._id} className="card rounded-2xl p-5 ">
               <div className="flex items-start gap-3">
                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
                   <button type="button" onClick={() => handleUpvoteAnswer(ans._id)}
@@ -214,7 +223,12 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
                   <div className="flex items-center gap-2 mt-3 text-xs text-gray-400 dark:text-slate-500">
                     <Avatar name={ans.authorName} />
                     <span className="font-medium text-gray-600 dark:text-slate-400">{ans.authorName}</span>
-                    {ans.isExpert && (
+                    {ans.isAgronomist && (
+                      <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-semibold text-xs">
+                        🩺 Agronomist
+                      </span>
+                    )}
+                    {ans.isExpert && !ans.isAgronomist && (
                       <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full font-semibold text-xs">
                         🏅 {t("Expert")}
                       </span>
@@ -230,7 +244,7 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
       </div>
 
       {/* Write answer */}
-      <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm space-y-3">
+      <div className="card rounded-2xl p-5  space-y-3">
         <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
           ✍️ {t("Your Answer")}
         </h3>
@@ -239,11 +253,11 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
           onChange={e => setAnswer(e.target.value)}
           rows={5}
           placeholder={t("Share your farming experience or knowledge…")}
-          className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/30 resize-y"
+          className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30 resize-y"
         />
         {error && <p className="text-xs text-red-600 dark:text-red-400">⚠ {error}</p>}
         <button type="button" onClick={submitAnswer} disabled={saving || !answer.trim()}
-          className="bg-green-700 hover:bg-green-800 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center gap-2">
+          className="btn-primary px-6 py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center gap-2">
           {saving ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{t("Posting…")}</> : `📤 ${t("Post Answer")}`}
         </button>
         <p className="text-xs text-gray-400 dark:text-slate-500">
@@ -256,22 +270,43 @@ function PostDetail({ postId, currentUserId, onBack, t }) {
 
 // ── New post form ─────────────────────────────────────────────────────────────
 function NewPostForm({ onCreated, onCancel, t }) {
-  const [form, setForm] = useState({ title: "", body: "", crop: "", tags: "" });
-  const [saving, setSaving] = useState(false);
-  const [error,  setError]  = useState(null);
+  const [form,    setForm]    = useState({ title: "", body: "", crop: "", tags: "" });
+  const [images,  setImages]  = useState([]); // File objects
+  const [previews,setPreviews]= useState([]);
+  const [saving,  setSaving]  = useState(false);
+  const [error,   setError]   = useState(null);
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
-  const cls = "w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/30";
+  const cls = "w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30";
+
+  function handleImages(e) {
+    const files = Array.from(e.target.files).slice(0, 3);
+    setImages(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+  }
+
+  function removeImage(i) {
+    setImages(prev => prev.filter((_, idx) => idx !== i));
+    setPreviews(prev => prev.filter((_, idx) => idx !== i));
+  }
 
   async function submit(e) {
     e.preventDefault();
-    if (!form.title.trim() || !form.body.trim()) {
-      setError("Title and question are required.");
-      return;
-    }
+    if (!form.title.trim() || !form.body.trim()) { setError("Title and question are required."); return; }
     setSaving(true); setError(null);
     try {
       const tags = form.tags.split(",").map(s => s.trim()).filter(Boolean);
-      const r = await createCommunityPost({ ...form, tags });
+      let payload;
+      if (images.length > 0) {
+        payload = new FormData();
+        payload.append("title", form.title);
+        payload.append("body",  form.body);
+        payload.append("crop",  form.crop);
+        tags.forEach(tag => payload.append("tags", tag));
+        images.forEach(img => payload.append("images", img));
+      } else {
+        payload = { ...form, tags };
+      }
+      const r = await createCommunityPost(payload);
       onCreated(r.data.post);
     } catch (e) {
       setError(e.response?.data?.message || e.message);
@@ -281,10 +316,8 @@ function NewPostForm({ onCreated, onCancel, t }) {
   }
 
   return (
-    <form onSubmit={submit} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-6 shadow-sm space-y-4">
-      <h3 className="font-bold text-gray-800 dark:text-slate-200 text-sm uppercase tracking-wide">
-        ✍️ {t("Ask the Community")}
-      </h3>
+    <form onSubmit={submit} className="card rounded-2xl p-6  space-y-4">
+      <h3 className="font-bold text-gray-800 dark:text-slate-200 text-sm uppercase tracking-wide">✍️ {t("Ask the Community")}</h3>
       <div>
         <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1 block">{t("Question Title")}</label>
         <input value={form.title} onChange={set("title")} className={cls}
@@ -308,14 +341,37 @@ function NewPostForm({ onCreated, onCancel, t }) {
         </div>
         <div>
           <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1 block">{t("Tags (comma separated)")}</label>
-          <input value={form.tags} onChange={set("tags")} className={cls}
-            placeholder={t("e.g. irrigation, pest, fertilizer")} />
+          <input value={form.tags} onChange={set("tags")} className={cls} placeholder={t("e.g. irrigation, pest, fertilizer")} />
         </div>
       </div>
+
+      {/* Image upload */}
+      <div>
+        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1 block">
+          📷 {t("Photos")} <span className="font-normal normal-case text-gray-400">(optional, up to 3 — share diseased leaf photos)</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 hover:border-emerald-400 transition">
+          <span className="text-xl">📷</span>
+          <span className="text-sm text-gray-500 dark:text-slate-400">{t("Click to add photos")}</span>
+          <input type="file" accept="image/*" multiple className="hidden" onChange={handleImages} />
+        </label>
+        {previews.length > 0 && (
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {previews.map((src, i) => (
+              <div key={i} className="relative">
+                <img src={src} alt="" className="w-20 h-20 object-cover rounded-xl border border-gray-200 dark:border-slate-600" />
+                <button type="button" onClick={() => removeImage(i)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center leading-none">×</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {error && <p className="text-xs text-red-600 dark:text-red-400">⚠ {error}</p>}
       <div className="flex gap-3">
         <button type="submit" disabled={saving}
-          className="flex-1 bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+          className="flex-1 btn-primary py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
           {saving ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{t("Posting…")}</> : `🌾 ${t("Post Question")}`}
         </button>
         <button type="button" onClick={onCancel}
@@ -421,22 +477,22 @@ export default function CommunityPage() {
     : posts;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+    <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+      <div className="bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] text-white px-6 py-10">
         <div className="max-w-5xl mx-auto flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-green-300 text-sm mb-1">👥 {t("Community")}</p>
+            <p className="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-2">👥 {t("Community")}</p>
             <h1 className="text-2xl md:text-3xl font-bold">{t("Farmer Q&A Forum")}</h1>
-            <p className="text-green-200 text-sm mt-1 max-w-xl">
+            <p className="text-emerald-200/80 text-sm mt-1.5 max-w-xl">
               {t("Ask questions, share knowledge, and get answers from fellow farmers and agri-experts.")}
             </p>
           </div>
           {!showForm && !activePost && (
             <button type="button" onClick={() => setShowForm(true)}
-              className="bg-white text-green-800 font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 transition shadow">
+              className="bg-white text-emerald-800 font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition shadow-lg">
               ✍️ {t("Ask a Question")}
             </button>
           )}
@@ -471,21 +527,21 @@ export default function CommunityPage() {
                 <div className="space-y-3">
                   <input value={search} onChange={e => setSearch(e.target.value)}
                     placeholder={t("Search questions…")}
-                    className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500" />
+                    className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500" />
 
                   <div className="flex gap-2 flex-wrap">
                     {SORT_OPTIONS.map(s => (
                       <button key={s.value} type="button" onClick={() => setSort(s.value)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
                           sort === s.value
-                            ? "bg-green-700 text-white border-green-700"
+                            ? "bg-emerald-600 text-white border-emerald-600"
                             : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:border-green-300"
                         }`}>
                         {s.label}
                       </button>
                     ))}
                     <select value={cropFilter} onChange={e => setCropFilter(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 outline-none focus:border-green-500 appearance-none">
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 outline-none focus:border-emerald-500 appearance-none">
                       <option value="">{t("All Crops")}</option>
                       {CROPS.filter(Boolean).map(c => (
                         <option key={c} value={c}>{CROP_EMOJI[c] || "🌾"} {c}</option>
@@ -505,7 +561,7 @@ export default function CommunityPage() {
                 {loading ? (
                   <div className="space-y-3">
                     {[1,2,3].map(i => (
-                      <div key={i} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 animate-pulse h-28" />
+                      <div key={i} className="card rounded-2xl p-5 animate-pulse h-28" />
                     ))}
                   </div>
                 ) : filtered.length === 0 ? (
@@ -562,7 +618,7 @@ export default function CommunityPage() {
             <AskAIPanel t={t} lang={lang} currentLang={currentLang} speechCode={speechCode} />
 
             {/* Community stats */}
-            <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm space-y-3">
+            <div className="card rounded-2xl p-5  space-y-3">
               <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
                 📊 {t("Community")}
               </h3>
@@ -587,8 +643,8 @@ export default function CommunityPage() {
             </div>
 
             {/* How it works */}
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-2xl p-5 space-y-3">
-              <h3 className="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wide">
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl p-5 space-y-3">
+              <h3 className="text-sm font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
                 💡 {t("How It Works")}
               </h3>
               <ul className="space-y-2 text-xs text-gray-600 dark:text-slate-400">
@@ -615,7 +671,7 @@ export default function CommunityPage() {
                 { to:"/market",     icon:"💰", label:t("Market Prices") },
               ].map(({ to, icon, label }) => (
                 <Link key={to} to={to}
-                  className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
+                  className="flex items-center gap-2 bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700/60 rounded-xl p-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
                   <span>{icon}</span>{label}
                 </Link>
               ))}

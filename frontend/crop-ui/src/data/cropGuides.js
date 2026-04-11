@@ -1507,8 +1507,19 @@ export const CROP_GUIDES = {
   },
 };
 
+// ── ML label → guide key normalisation ───────────────────────────────────────
+// The ML model outputs compact labels (no spaces). Map them to guide keys.
+const ML_LABEL_MAP = {
+  mothbeans:   "moth beans",
+  pigeonpeas:  "pigeon peas",
+  kidneybeans: "kidney beans",
+  mungbean:    "mung bean",
+  blackgram:   "black gram",
+};
+
 // ── Lookup function ───────────────────────────────────────────────────────────
 export function getCropGuide(cropName) {
   if (!cropName) return null;
-  return CROP_GUIDES[cropName.toLowerCase().trim()] || null;
+  const key = cropName.toLowerCase().trim();
+  return CROP_GUIDES[ML_LABEL_MAP[key] || key] || null;
 }

@@ -20,6 +20,8 @@ import { useAuth } from "../context/AuthContext";
 import { getGeocode, getGeocodeStatus, postMlPrediction } from "../api/api";
 import { DISTRICTS_BY_STATE } from "../data/indiaDistrictsByState";
 import { INDIAN_STATES_AND_UTS } from "../data/indiaStates";
+import FertilizerPlanCard from "../components/FertilizerPlanCard";
+import CropRotationCard from "../components/CropRotationCard";
 import { getCropInfo } from "../data/cropInfo";
 import { getMSP } from "../data/mspData";
 import {
@@ -60,7 +62,7 @@ function FieldRow({ label, hint, children, voiceProps }) {
 }
 
 const inputClass =
-  "w-full rounded-xl border border-green-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-200";
+  "w-full rounded-xl border border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-700/60 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-green-200";
 
 function parseGeocodeError(err) {
   if (!err.response)
@@ -445,7 +447,7 @@ export default function PredictionPage() {
           null;
 
   const geoBannerColor =
-    geoStatus === "granted" ? "bg-green-50 border-green-300 text-green-800" :
+    geoStatus === "granted" ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300" :
       geoStatus === "denied" ? "bg-amber-50 border-amber-300 text-amber-800" :
         geoStatus === "requesting" ? "bg-blue-50  border-blue-200  text-blue-800" :
           "bg-gray-50 border-gray-200 text-gray-700";
@@ -501,7 +503,7 @@ export default function PredictionPage() {
 
   /* ════════════════════════════════════════════════════════════════════ */
   return (
-    <div className="min-h-screen bg-green-100 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif] text-gray-900 dark:text-slate-100">
+    <div className="min-h-screen bg-[#f8faf8] dark:bg-[#0d1117] font-[Outfit,system-ui,sans-serif] text-gray-900 dark:text-slate-100">
       {guideModal && <CropGuideModal cropName={guideModal} onClose={() => setGuideModal(null)} />}
       <Navbar />
 
@@ -519,15 +521,15 @@ export default function PredictionPage() {
         </div>
 
         {/* Personalized profile banner */}
-        {user && (user.farmSize || user.soilType || user.location?.state) && (          <div className="mb-6 rounded-xl border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 px-4 py-3 flex items-center gap-3 flex-wrap">
+        {user && (user.farmSize || user.soilType || user.location?.state) && (          <div className="mb-6 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/30 px-4 py-3 flex items-center gap-3 flex-wrap">
             <span className="text-lg">👤</span>
-            <div className="flex-1 text-sm text-green-800 dark:text-green-300">
+            <div className="flex-1 text-sm text-emerald-800 dark:text-emerald-300">
               <span className="font-semibold">{t("Using your profile")}: </span>
               {user.farmSize && <span className="mr-3">📐 {user.farmSize} ha</span>}
               {user.soilType && <span className="mr-3">🧱 {user.soilType}</span>}
               {user.location?.state && <span className="mr-3">📍 {user.location.state}{user.location.district ? `, ${user.location.district}` : ""}</span>}
             </div>
-            <Link to="/dashboard" className="text-xs text-green-700 dark:text-green-400 font-semibold hover:underline flex-shrink-0">
+            <Link to="/dashboard" className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold hover:underline flex-shrink-0">
               {t("Edit Profile")} →
             </Link>
           </div>
@@ -535,7 +537,7 @@ export default function PredictionPage() {
 
         {/* IoT sensor data banner */}
         {routerLocation?.state?.prefill && (
-          <div className="mb-4 rounded-xl border border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 px-4 py-3 flex items-center gap-3 flex-wrap">
+          <div className="mb-4 rounded-xl border border-blue-200 dark:border-blue-800/50 bg-blue-50 dark:bg-blue-950/30 px-4 py-3 flex items-center gap-3 flex-wrap">
             <span className="text-lg">📡</span>
             <div className="flex-1 text-sm text-blue-800 dark:text-blue-300">
               <span className="font-semibold">{t("Soil data pre-filled from IoT sensor")}: </span>
@@ -559,7 +561,7 @@ export default function PredictionPage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
 
           {/* ══ FORM ══════════════════════════════════════════════════════ */}
-          <form onSubmit={handleSubmit} className="space-y-8 rounded-2xl border border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-lg sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-8 rounded-2xl border border-gray-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 p-6 shadow-lg sm:p-8">
 
             {/* ── Weather input: location-based APIs vs manual ── */}
             <section className="space-y-4">
@@ -634,7 +636,7 @@ export default function PredictionPage() {
             {weatherInputMode === "location" && (
             <section className="space-y-4">
               <div className="flex items-center gap-2">
-                <HiOutlineMap className="h-5 w-5 text-green-700" />
+                <HiOutlineMap className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
                 <h2 className="text-lg font-semibold text-gray-900">{t("Location")}</h2>
               </div>
               <p className="text-sm text-gray-600">{t("Your location is detected automatically. You can also pin the map or type an address.")}</p>
@@ -647,7 +649,7 @@ export default function PredictionPage() {
                     type="button"
                     onClick={() => { setLocationMode(mode); setGeocodeStatus("idle"); setGeocodeHint(""); }}
                     className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${locationMode === mode
-                      ? "bg-green-700 text-white shadow-sm"
+                      ? "bg-emerald-600 text-white shadow-sm"
                       : "text-gray-600 hover:bg-white/80 hover:text-gray-900"
                       }`}
                   >
@@ -663,7 +665,7 @@ export default function PredictionPage() {
                 disabled={geoStatus === "requesting"}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-green-400 bg-green-50 px-4 py-3 text-sm font-semibold text-green-900 shadow-sm transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
-                <HiOutlineMapPin className="h-4 w-4 text-green-700" />
+                <HiOutlineMapPin className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                 {geoStatus === "requesting" ? t("Detecting location…") : t("Use my current location")}
               </button>
 
@@ -699,7 +701,7 @@ export default function PredictionPage() {
                         key={mode}
                         type="button"
                         onClick={() => { setAddressDetailMode(mode); setGeocodeStatus("idle"); setGeocodeHint(""); }}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${addressDetailMode === mode ? "bg-green-700 text-white shadow-sm" : "text-gray-600 hover:bg-white/80"
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition ${addressDetailMode === mode ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-white/80"
                           }`}
                       >
                         {mode === "free" ? "Type address" : "State / district / village / PIN"}
@@ -788,7 +790,7 @@ export default function PredictionPage() {
             {/* ── Soil & Nutrients ── */}
             <section className="space-y-4 border-t border-green-100 pt-8">
               <div className="flex items-center gap-2">
-                <HiOutlineBeaker className="h-5 w-5 text-green-700" />
+                <HiOutlineBeaker className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
                 <h2 className="text-lg font-semibold text-gray-900">{t("Soil & Nutrients")}</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -814,7 +816,7 @@ export default function PredictionPage() {
             {/* ── Crop Timing ── */}
             <section className="space-y-4 border-t border-green-100 pt-8">
               <div className="flex items-center gap-2">
-                <HiOutlineCalendarDays className="h-5 w-5 text-green-700" />
+                <HiOutlineCalendarDays className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
                 <h2 className="text-lg font-semibold text-gray-900">{t("Crop Timing")}</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -871,7 +873,7 @@ export default function PredictionPage() {
           </form>
 
           {/* ══ RESULT SIDEBAR ══════════════════════════════════════════════ */}
-          <aside className="space-y-4 rounded-2xl border border-green-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-lg lg:sticky lg:top-6">
+          <aside className="space-y-4 rounded-2xl border border-gray-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 p-6 shadow-lg lg:sticky lg:top-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">{t("Result")}</h3>
             {!result ? (
               <div className="rounded-xl border border-dashed border-green-200 bg-green-50/50 p-6 text-center text-sm text-gray-600">
@@ -990,7 +992,7 @@ export default function PredictionPage() {
                       {result.yield?.total_yield_q && (
                         <div className="mt-2 bg-white rounded-lg p-2.5 border border-amber-100 text-center">
                           <p className="text-xs text-gray-500 mb-0.5">Estimated Revenue at MSP</p>
-                          <p className="text-lg font-bold text-green-700">
+                          <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
                             ₹{Math.round(result.yield.total_yield_q * msp.msp).toLocaleString("en-IN")}
                           </p>
                         </div>
@@ -1039,7 +1041,7 @@ export default function PredictionPage() {
                             <button
                               type="button"
                               onClick={() => setGuideModal(alt.crop)}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-green-300 hover:text-green-700"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-green-300 hover:text-emerald-700 dark:text-emerald-400"
                               aria-label={`View guide for ${alt.crop}`}
                               title="View farming guide"
                             >
@@ -1083,6 +1085,22 @@ export default function PredictionPage() {
                   >
                     📊 {t("See Profit Analysis for Top 3 Crops →")}
                   </button>
+                )}
+
+                {/* ── Fertilizer Plan ── */}
+                {result.recommendedCrop && (
+                  <FertilizerPlanCard
+                    crop={result.recommendedCrop}
+                    N={Number(nitrogen) || null}
+                    P={Number(phosphorus) || null}
+                    K={Number(potassium) || null}
+                    farmSizeHa={Number(farmSizeHa) > 0 ? Number(farmSizeHa) : 1}
+                  />
+                )}
+
+                {/* ── Crop Rotation ── */}
+                {result.recommendedCrop && (
+                  <CropRotationCard crop={result.recommendedCrop} />
                 )}
 
               </div>

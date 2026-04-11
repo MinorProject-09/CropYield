@@ -30,12 +30,13 @@ function DayCard({ date, tMax, tMin, rain, rainProb, wind, code, isToday, t }) {
   const { icon, label } = wmoInfo(code);
   const dayName = isToday ? t("Today") : new Date(date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
   const rainRisk = rain >= 50 ? "text-red-600 dark:text-red-400" : rain >= 20 ? "text-amber-600 dark:text-amber-400" : "text-blue-600 dark:text-blue-400";
+  const safeToSpray = (rain ?? 99) < 2 && (wind ?? 99) < 15 && (tMax ?? 99) < 38;
 
   return (
     <div className={`rounded-2xl border p-4 flex flex-col items-center gap-2 text-center transition ${
       isToday
-        ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 shadow-md"
-        : "bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 hover:border-green-200 dark:hover:border-green-700"
+        ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700 shadow-md"
+        : "bg-white dark:bg-slate-800/80 border-gray-100 dark:border-slate-700/60 hover:border-emerald-200 dark:hover:border-emerald-700"
     }`}>
       <div className="text-xs font-semibold text-gray-500 dark:text-slate-400">{dayName}</div>
       <div className="text-4xl">{icon}</div>
@@ -50,6 +51,16 @@ function DayCard({ date, tMax, tMin, rain, rainProb, wind, code, isToday, t }) {
         {rainProb != null && <span className="text-gray-400 dark:text-slate-500 font-normal"> ({rainProb}%)</span>}
       </div>
       <div className="text-xs text-gray-400 dark:text-slate-500">💨 {wind != null ? `${Math.round(wind)} km/h` : "—"}</div>
+      {/* Spray window badge */}
+      {safeToSpray ? (
+        <span className="text-xs font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+          🌿 Safe to Spray
+        </span>
+      ) : (
+        <span className="text-xs font-semibold bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 px-2 py-0.5 rounded-full">
+          ✗ Avoid Spray
+        </span>
+      )}
     </div>
   );
 }
@@ -98,21 +109,30 @@ function CurrentStrip({ current, t }) {
   if (!current) return null;
   const { icon } = wmoInfo(current.weathercode);
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      {[
-        { icon: icon,  label: t("Condition"),   value: wmoInfo(current.weathercode).label },
-        { icon: "🌡️", label: t("Temperature"), value: `${current.temperature_2m}°C` },
-        { icon: "💦",  label: t("Humidity"),    value: `${current.relative_humidity_2m}%` },
-        { icon: "💨",  label: t("Wind"),        value: `${current.wind_speed_10m} km/h` },
-      ].map(({ icon: ic, label, value }) => (
-        <div key={label} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3">
-          <span className="text-2xl">{ic}</span>
-          <div>
-            <div className="text-xs text-gray-400 dark:text-slate-500">{label}</div>
-            <div className="font-bold text-gray-900 dark:text-slate-100 text-sm">{t(value)}</div>
+    <div className="space-y-3">
+      {current.description && (
+        <p className="text-sm text-gray-600 dark:text-slate-400 capitalize">
+          {icon} {current.description}
+        </p>
+      )}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { icon: "🌡️", label: t("Temperature"),  value: `${current.temperature_2m}°C${current.feels_like != null ? ` (feels ${current.feels_like.toFixed(1)}°)` : ""}` },
+          { icon: "💦",  label: t("Humidity"),     value: `${current.relative_humidity_2m}%` },
+          { icon: "💨",  label: t("Wind"),         value: `${current.wind_speed_10m} km/h` },
+          { icon: "🌧",  label: t("Rain (1h)"),    value: `${current.precipitation ?? 0} mm` },
+          ...(current.pressure ? [{ icon: "🔵", label: t("Pressure"), value: `${current.pressure} hPa` }] : []),
+          ...(current.visibility != null ? [{ icon: "👁", label: t("Visibility"), value: `${current.visibility} km` }] : []),
+        ].map(({ icon: ic, label, value }) => (
+          <div key={label} className="card rounded-2xl p-4 flex items-center gap-3">
+            <span className="text-2xl">{ic}</span>
+            <div>
+              <div className="text-xs text-gray-400 dark:text-slate-500">{label}</div>
+              <div className="font-bold text-gray-900 dark:text-slate-100 text-sm">{value}</div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -121,7 +141,7 @@ function CurrentStrip({ current, t }) {
 function LocationPicker({ onLocate, loading, t }) {
   const [manual, setManual] = useState({ lat: "", lng: "" });
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm space-y-4">
+    <div className="card rounded-2xl p-5  space-y-4">
       <h3 className="font-bold text-gray-800 dark:text-slate-200 text-sm uppercase tracking-wide">
         📍 {t("Set Your Farm Location")}
       </h3>
@@ -135,7 +155,7 @@ function LocationPicker({ onLocate, loading, t }) {
           );
         }}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-60"
+        className="w-full flex items-center justify-center gap-2 btn-primary py-2.5 rounded-xl text-sm transition disabled:opacity-60"
       >
         {loading ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{t("Detecting…")}</> : `📡 ${t("Use My Current Location")}`}
       </button>
@@ -147,14 +167,14 @@ function LocationPicker({ onLocate, loading, t }) {
       <div className="flex gap-2">
         <input type="number" step="any" value={manual.lat} onChange={e => setManual(m => ({ ...m, lat: e.target.value }))}
           placeholder={t("Latitude")}
-          className="flex-1 border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500" />
+          className="flex-1 border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500" />
         <input type="number" step="any" value={manual.lng} onChange={e => setManual(m => ({ ...m, lng: e.target.value }))}
           placeholder={t("Longitude")}
-          className="flex-1 border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500" />
+          className="flex-1 border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500" />
         <button
           type="button"
           onClick={() => { if (manual.lat && manual.lng) onLocate(Number(manual.lat), Number(manual.lng)); }}
-          className="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded-xl text-sm transition"
+          className="btn-primary px-4 py-2 rounded-xl text-sm transition"
         >
           {t("Go")}
         </button>
@@ -206,20 +226,20 @@ export default function WeatherPage() {
   const warningRisks  = risks.filter(r => r.level === "warning");
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+    <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-blue-800 to-blue-700 text-white px-6 py-10">
+      <div className="bg-gradient-to-br from-[#1e3a5f] via-[#1d4ed8] to-[#2563eb] text-white px-6 py-10">
         <div className="max-w-5xl mx-auto flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-blue-300 text-sm mb-1">🌤 {t("Weather & Risk")}</p>
+            <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-2">🌤 {t("Weather & Risk")}</p>
             <h1 className="text-2xl md:text-3xl font-bold">{t("7-Day Farm Forecast")}</h1>
-            <p className="text-blue-200 text-sm mt-1">
-              {t("Hyperlocal forecast with frost, flood, pest, and disease risk alerts.")}
+            <p className="text-blue-200/80 text-sm mt-1.5">
+              {t("Accurate 5-day forecast with frost, flood, pest, and disease risk alerts.")}
             </p>
             {locName && coords && (
-              <p className="text-blue-300 text-xs mt-2">
+              <p className="text-blue-300/70 text-xs mt-2">
                 📍 {locName} · {coords.lat.toFixed(4)}°N, {coords.lng.toFixed(4)}°E
               </p>
             )}
@@ -255,8 +275,8 @@ export default function WeatherPage() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center gap-3 py-20 text-blue-700 dark:text-blue-400">
-            <span className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center justify-center gap-3 py-20 text-emerald-700 dark:text-emerald-400">
+            <span className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
             <span className="text-base font-medium">{t("Fetching hyperlocal forecast…")}</span>
           </div>
         )}
@@ -309,7 +329,7 @@ export default function WeatherPage() {
             {/* 7-day forecast grid */}
             <div>
               <h2 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide mb-3">
-                📅 {t("7-Day Forecast")}
+                📅 {t("5-Day Forecast")}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                 {daily?.time?.map((date, i) => (
@@ -329,9 +349,42 @@ export default function WeatherPage() {
               </div>
             </div>
 
+            {/* Spray window summary */}
+            {daily?.time && (() => {
+              const safedays = daily.time.filter((_, i) =>
+                (daily.precipitation_sum?.[i] ?? 99) < 2 &&
+                (daily.wind_speed_10m_max?.[i] ?? 99) < 15 &&
+                (daily.temperature_2m_max?.[i] ?? 99) < 38
+              );
+              return (
+                <div className={`rounded-2xl border p-4 flex items-start gap-3 ${
+                  safedays.length > 0
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50"
+                    : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50"
+                }`}>
+                  <span className="text-2xl flex-shrink-0">{safedays.length > 0 ? "🌿" : "⚠️"}</span>
+                  <div>
+                    <p className={`font-bold text-sm ${safedays.length > 0 ? "text-emerald-800 dark:text-emerald-300" : "text-amber-800 dark:text-amber-300"}`}>
+                      {safedays.length > 0
+                        ? `${safedays.length} safe day${safedays.length > 1 ? "s" : ""} for spraying this week`
+                        : "No ideal spray days this week"}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                      Conditions: rain &lt; 2mm · wind &lt; 15 km/h · temp &lt; 38°C
+                      {safedays.length > 0 && (
+                        <span className="ml-1 font-medium text-emerald-700 dark:text-emerald-400">
+                          — {safedays.map(d => new Date(d + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric" })).join(", ")}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Sunrise/sunset */}
             {daily?.sunrise && (
-              <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+              <div className="card rounded-2xl p-5 ">
                 <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide mb-3">
                   🌅 {t("Sunrise & Sunset")}
                 </h3>
@@ -391,7 +444,7 @@ export default function WeatherPage() {
             </div>
 
             {/* Change location */}
-            <details className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl shadow-sm overflow-hidden">
+            <details className="card rounded-2xl  overflow-hidden">
               <summary className="px-5 py-3 cursor-pointer text-sm font-semibold text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200">
                 📍 {t("Change Location")}
               </summary>
@@ -401,7 +454,7 @@ export default function WeatherPage() {
             </details>
 
             <p className="text-xs text-gray-400 dark:text-slate-500">
-              * {t("Forecast data from Open-Meteo (open-meteo.com). Updated hourly. Agricultural risk thresholds based on ICAR guidelines.")}
+              * {t("Forecast data from OpenWeatherMap (openweathermap.org). Updated every 3 hours. Agricultural risk thresholds based on ICAR guidelines.")}
             </p>
           </>
         )}

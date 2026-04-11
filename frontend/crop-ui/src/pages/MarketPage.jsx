@@ -42,10 +42,10 @@ function PriceBar({ min, modal, max, msp }) {
   return (
     <div className="relative h-6 bg-gray-100 dark:bg-slate-700 rounded-full overflow-visible mt-1">
       {/* Range bar */}
-      <div className="absolute h-full bg-green-200 dark:bg-green-800 rounded-full"
+      <div className="absolute h-full bg-emerald-200 dark:bg-emerald-800 rounded-full"
         style={{ left: `${pct(min)}%`, width: `${pct(max) - pct(min)}%` }} />
       {/* Modal marker */}
-      <div className="absolute top-0 h-full w-1 bg-green-600 dark:bg-green-400 rounded-full"
+      <div className="absolute top-0 h-full w-1 bg-emerald-600 dark:bg-emerald-400 rounded-full"
         style={{ left: `${pct(modal)}%` }} />
       {/* MSP marker */}
       {msp && (
@@ -116,7 +116,7 @@ function SeasonalChart({ monthlyPrices, currentMonthNum, t }) {
   const MONTHS = ["J","F","M","A","M","J","J","A","S","O","N","D"];
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+    <div className="card rounded-2xl p-5 ">
       <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide mb-4">
         📅 {t("Seasonal Price Calendar")} ({t("₹/quintal")})
       </h3>
@@ -179,7 +179,7 @@ function SellingStrategy({ bestTime, prices, t }) {
 
   return (
     <div className={`rounded-2xl border p-5 space-y-4 ${
-      isGoodTime ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700"
+      isGoodTime ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700"
       : isBadTime ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
       : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
     }`}>
@@ -267,24 +267,24 @@ export default function MarketPage() {
   const currentMonthNum = new Date().getMonth() + 1;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+    <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+      <div className="bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] text-white px-6 py-10">
         <div className="max-w-5xl mx-auto flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="text-green-300 text-sm mb-1">💰 {t("Market Intelligence")}</p>
+            <p className="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-2">💰 {t("Market Intelligence")}</p>
             <h1 className="text-2xl md:text-3xl font-bold">{t("Live Mandi Prices")}</h1>
-            <p className="text-green-200 text-sm mt-1 max-w-xl">
+            <p className="text-emerald-200/80 text-sm mt-1.5 max-w-xl">
               {t("Compare prices across mandis, find the best time and place to sell your crop.")}
             </p>
           </div>
           {prices && (
             <div className="flex gap-3 flex-wrap">
               {prices.source === "live" ? (
-                <span className="bg-green-500/20 border border-green-400/40 text-green-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" /> {t("Live Data")}
+                <span className="bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> {t("Live Data")}
                 </span>
               ) : (
                 <span className="bg-amber-500/20 border border-amber-400/40 text-amber-200 text-xs font-semibold px-3 py-1.5 rounded-full">
@@ -309,13 +309,13 @@ export default function MarketPage() {
 
         {/* Search form */}
         <form onSubmit={handleSearch}
-          className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm">
+          className="card rounded-2xl p-5 ">
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
               <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1 block">{t("Crop")}</label>
               <div className="relative">
                 <select value={commodity} onChange={e => setCommodity(e.target.value)}
-                  className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500 appearance-none pr-8">
+                  className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500 appearance-none pr-8">
                   {CROPS.map(c => (
                     <option key={c} value={c}>{CROP_EMOJI[c] || "🌾"} {c.charAt(0).toUpperCase() + c.slice(1)}</option>
                   ))}
@@ -327,7 +327,7 @@ export default function MarketPage() {
               <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-1 block">{t("State")}</label>
               <div className="relative">
                 <select value={state} onChange={e => setState(e.target.value)}
-                  className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500 appearance-none pr-8">
+                  className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500 appearance-none pr-8">
                   <option value="">{t("All India")}</option>
                   {STATES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -336,7 +336,7 @@ export default function MarketPage() {
             </div>
             <div className="flex items-end">
               <button type="submit" disabled={loading}
-                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
+                className="w-full btn-primary py-2.5 rounded-xl text-sm transition disabled:opacity-60 flex items-center justify-center gap-2">
                 {loading
                   ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />{t("Loading…")}</>
                   : `🔍 ${t("Get Prices")}`}
@@ -361,7 +361,7 @@ export default function MarketPage() {
                 { icon: "📊",                          label: t("Avg Mandi Price"),value: prices.avgModal ? `₹${prices.avgModal.toLocaleString("en-IN")}/q` : "—", color: "text-green-700 dark:text-green-400" },
                 { icon: "🥇",                          label: t("Best Price"),     value: prices.bestMandi ? `₹${prices.bestMandi.modal_price.toLocaleString("en-IN")}/q` : "—", color: "text-amber-600 dark:text-amber-400" },
               ].map(({ icon, label, value, color }) => (
-                <div key={label} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3">
+                <div key={label} className="card rounded-2xl p-4 flex items-center gap-3">
                   <span className="text-2xl">{icon}</span>
                   <div>
                     <div className="text-xs text-gray-400 dark:text-slate-500">{label}</div>
@@ -415,7 +415,7 @@ export default function MarketPage() {
                 { href:"https://pmkisan.gov.in",      icon:"💰", label:t("PM-KISAN Portal") },
               ].map(({ href, icon, label }) => (
                 <a key={href} href={href} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-3 text-xs font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
+                  className="flex items-center gap-2 bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700/60 rounded-xl p-3 text-xs font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
                   <span className="text-base">{icon}</span>{label} ↗
                 </a>
               ))}
@@ -431,7 +431,7 @@ export default function MarketPage() {
             { to:"/prediction", icon:"🌾", label:t("Crop Prediction") },
           ].map(({ to, icon, label }) => (
             <Link key={to} to={to}
-              className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl p-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
+              className="flex items-center gap-2 bg-white dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700/60 rounded-xl p-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:border-green-300 dark:hover:border-green-600 transition">
               <span className="text-lg">{icon}</span>{label}
             </Link>
           ))}

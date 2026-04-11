@@ -67,8 +67,20 @@ export const getMarketBestTime = (commodity)         => api.get("/api/market/bes
 // ── Community API ─────────────────────────────────────────────────────────────
 export const getCommunityPosts    = (params)       => api.get("/api/community/posts", { params });
 export const getCommunityPost     = (id)           => api.get(`/api/community/posts/${id}`);
-export const createCommunityPost  = (data)         => api.post("/api/community/posts", data);
+export const createCommunityPost  = (data)         => {
+  // Support FormData for image uploads
+  if (data instanceof FormData) return api.post("/api/community/posts", data);
+  return api.post("/api/community/posts", data);
+};
 export const upvoteCommunityPost  = (id)           => api.post(`/api/community/posts/${id}/upvote`);
 export const addCommunityAnswer   = (id, body)     => api.post(`/api/community/posts/${id}/answers`, { body });
 export const upvoteCommunityAnswer= (id, aid)      => api.post(`/api/community/posts/${id}/answers/${aid}/upvote`);
 export const deleteCommunityPost  = (id)           => api.delete(`/api/community/posts/${id}`);
+
+// ── Notifications API ─────────────────────────────────────────────────────────
+export const getNotifications    = ()    => api.get("/api/notifications");
+export const markAllNotifRead    = ()    => api.post("/api/notifications/read-all");
+export const markNotifRead       = (id)  => api.post(`/api/notifications/${id}/read`);
+
+// ── Farm Fields API ───────────────────────────────────────────────────────────
+export const saveFields = (fields) => api.put("/api/auth/fields", { fields });

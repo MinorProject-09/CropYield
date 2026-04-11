@@ -32,9 +32,9 @@
   justify-content: center;
   padding: 2rem 1rem;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(74, 140, 63, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(200, 168, 75, 0.10) 0%, transparent 50%),
-    linear-gradient(160deg, #f0f7ee 0%, #faf6f0 50%, #f5f0e8 100%);
+    radial-gradient(ellipse at 20% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(5, 150, 105, 0.06) 0%, transparent 50%),
+    linear-gradient(160deg, #f0fdf4 0%, #f8faf8 50%, #f0fdf4 100%);
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -180,7 +180,7 @@
 .auth-btn {
   margin-top: 0.25rem;
   padding: 0.8rem;
-  background: linear-gradient(135deg, var(--green-500) 0%, var(--green-700) 100%);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: var(--white);
   border: none;
   border-radius: var(--radius);
@@ -190,7 +190,7 @@
   cursor: pointer;
   letter-spacing: 0.02em;
   transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.3);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,14 +409,14 @@
 /* ── Dark mode overrides ── */
 .dark .auth-page {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(74, 140, 63, 0.08) 0%, transparent 60%),
-    linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+    radial-gradient(ellipse at 20% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 60%),
+    linear-gradient(160deg, #0d1117 0%, #0d1117 100%);
 }
 
 .dark .auth-card {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(22, 27, 34, 0.98);
+  border-color: rgba(48, 54, 61, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 .dark .auth-brand-name,
