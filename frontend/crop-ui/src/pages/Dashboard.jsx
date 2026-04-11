@@ -28,7 +28,9 @@ function Badge({ children, color = "green" }) {
 }
 
 function ConfidenceBar({ value }) {
-  const pct = Math.round((value || 0) * 100);
+  
+  const pct = Math.round(Math.min(Math.max(value || 0, 0), 1) * 100);
+
   const color = pct >= 75 ? "bg-green-500" : pct >= 50 ? "bg-amber-400" : "bg-red-400";
   return (
     <div className="flex items-center gap-2">
