@@ -70,8 +70,8 @@ export default function VoiceSpeaker({ text, label = "Read result aloud", speech
       type="button"
       onClick={speaking ? stop : speak}
       className={`
-        inline-flex items-center gap-2  flex-col rounded-3xl border px-5 py-4 text-large font-sm transition bg-white shadow-lg
-        ${
+        inline-flex items-center gap-2  flex-col px-5 py-4 text-large font-sm transition bg-white shadow-lg bottom-6 right-6 z-50 bg-gradient-to-br from-green-600 to-emerald-800 text-white w-14 h-14 rounded-full hover:shadow-xl hover:scale-105  justify-center text-2xl border-2 border-white/20
+        ${  
           speaking
             ? "border-amber-400 bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300"
             : "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700 text-green-800 dark:text-green-300 hover:bg-slate-100 dark:hover:bg-green-900/40 "
@@ -85,12 +85,12 @@ export default function VoiceSpeaker({ text, label = "Read result aloud", speech
             {[1, 2, 3, 2, 1].map((h, i) => (
               <span
                 key={i}
-                className="w-0.5 rounded-full bg-amber-500 animate-pulse"
+                className="w-0.5 rounded-full bg-white animate-pulse"
                 style={{ height: `${h * 4}px`, animationDelay: `${i * 100}ms` }}
               />
             ))}
           </span>
-          Stop
+          
         </>
       ) : (
         <>
@@ -100,7 +100,6 @@ export default function VoiceSpeaker({ text, label = "Read result aloud", speech
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
           </svg>
-          {label}
         </>
       )}
     </button>

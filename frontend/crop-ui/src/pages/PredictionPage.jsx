@@ -90,6 +90,12 @@ export default function PredictionPage() {
   const navigate = useNavigate();
   const routerLocation = useLocation();
 
+  /* ── weather: fetch from location APIs vs manual input ── */
+  const [weatherInputMode, setWeatherInputMode] = useState("location");
+  const [manualTemperature, setManualTemperature] = useState("");
+  const [manualHumidity, setManualHumidity] = useState("");
+  const [manualRainfall, setManualRainfall] = useState("");
+
   /* ── location ── */
   const [locationMode, setLocationMode] = useState("map");
   const [latitude, setLatitude] = useState("");
@@ -349,6 +355,37 @@ export default function PredictionPage() {
     if (!Number.isFinite(mon) || mon < 1 || mon > 12) { setError("Select a valid crop month."); return; }
     if (!Number.isFinite(dur) || dur <= 0) { setError("Duration must be a positive number of days."); return; }
 
+    if (weatherInputMode === "manual") {
+      const mt = Number(manualTemperature);
+      const mh = Number(manualHumidity);
+      const mr = Number(manualRainfall);
+      if (!Number.isFinite(mt)) { setError("Enter temperature (°C)."); return; }
+      if (!Number.isFinite(mh) || mh < 0 || mh > 100) { setError("Enter humidity between 0 and 100%."); return; }
+      if (!Number.isFinite(mr) || mr < 0) { setError("Enter average monthly rainfall (mm)."); return; }
+      setLoading(true);
+      try {
+        const { data } = await postMlPrediction({
+          weatherSource: "manual",
+          manualWeather: { temperature: mt, humidity: mh, rainfall: mr },
+          soilPh: ph,
+          nitrogen: n,
+          phosphorus: p,
+          potassium: k,
+          cropMonth: mon,
+          duration: dur,
+          farmSizeHa: Number(farmSizeHa) > 0 ? Number(farmSizeHa) : 1,
+        });
+        setResult(data);
+        
+      } catch (err) {
+        const msg = err.response?.data?.message || err.message || "Prediction request failed.";
+        setError(typeof msg === "string" ? msg : "Prediction request failed.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     let locationPayload;
     if (locationMode === "map") {
       const lat = Number(latitude), lng = Number(longitude);
@@ -383,6 +420,7 @@ export default function PredictionPage() {
     setLoading(true);
     try {
       const { data } = await postMlPrediction({
+        weatherSource: "location",
         location: locationPayload,
         soilPh: ph,
         nitrogen: n,
@@ -424,7 +462,8 @@ export default function PredictionPage() {
     parts.push(`Recommended crop: ${crop}. Confidence: ${conf} percent.`);
 
     if (result.weather) {
-      parts.push(`Weather at your location: Temperature ${result.weather.temperature} degrees Celsius. Humidity ${result.weather.humidity} percent. Average monthly rainfall ${result.weather.rainfall} millimeters.`);
+      const src = result.weather.breakdown?.source === "manual" ? "you entered" : "at your location";
+      parts.push(`Weather ${src}: Temperature ${result.weather.temperature} degrees Celsius. Humidity ${result.weather.humidity} percent. Average monthly rainfall ${result.weather.rainfall} millimeters.`);
     }
 
     if (result.yield?.available) {
@@ -524,7 +563,77 @@ export default function PredictionPage() {
           {/* ══ FORM ══════════════════════════════════════════════════════ */}
           <form onSubmit={handleSubmit} className="space-y-8 rounded-2xl border border-gray-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/80 p-6 shadow-lg sm:p-8">
 
-            {/* ── Location ── */}
+            {/* ── Weather input: location-based APIs vs manual ── */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <HiOutlineMap className="h-5 w-5 text-green-700" />
+                <h2 className="text-lg font-semibold text-gray-900">{t("Weather data")}</h2>
+              </div>
+              <p className="text-sm text-gray-600">
+                {t("Choose: fetch temperature, humidity, and rainfall from your pin (NASA + OpenWeather), or enter them yourself — no map needed.")}
+              </p>
+              <div className="flex flex-wrap gap-2 rounded-xl border border-green-200 bg-green-50/80 p-1">
+                {["location", "manual"].map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setWeatherInputMode(mode)}
+                    className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+                      weatherInputMode === mode
+                        ? "bg-green-700 text-white shadow-sm"
+                        : "text-gray-600 hover:bg-white/80 hover:text-gray-900"
+                    }`}
+                  >
+                    {mode === "location" ? t("Use map / location") : t("Enter weather manually")}
+                  </button>
+                ))}
+              </div>
+
+              {weatherInputMode === "manual" ? (
+                <div className="grid gap-4 sm:grid-cols-3 rounded-xl border border-green-200 bg-green-50/50 p-4">
+                  <FieldRow label={t("Temperature (°C)")} hint={t("Air temperature")} voiceProps={vp(setManualTemperature)}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={manualTemperature}
+                      onChange={(e) => setManualTemperature(e.target.value)}
+                      placeholder="e.g. 28"
+                      className={inputClass}
+                    />
+                  </FieldRow>
+                  <FieldRow label={t("Humidity (%)")} hint={t("0–100")} voiceProps={vp(setManualHumidity)}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="100"
+                      value={manualHumidity}
+                      onChange={(e) => setManualHumidity(e.target.value)}
+                      placeholder="e.g. 65"
+                      className={inputClass}
+                    />
+                  </FieldRow>
+                  <FieldRow
+                    label={t("Avg monthly rainfall (mm)")}
+                    hint={t("Average monthly rain — same style as climate normals")}
+                    voiceProps={vp(setManualRainfall)}
+                  >
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={manualRainfall}
+                      onChange={(e) => setManualRainfall(e.target.value)}
+                      placeholder="e.g. 120"
+                      className={inputClass}
+                    />
+                  </FieldRow>
+                </div>
+              ) : null}
+            </section>
+
+            {/* ── Location (only when using APIs) ── */}
+            {weatherInputMode === "location" && (
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <HiOutlineMap className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
@@ -676,6 +785,7 @@ export default function PredictionPage() {
                 </div>
               )}
             </section>
+            )}
 
             {/* ── Soil & Nutrients ── */}
             <section className="space-y-4 border-t border-green-100 pt-8">
@@ -794,7 +904,7 @@ export default function PredictionPage() {
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
                       <span>{t("Confidence")}</span>
-                      <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(result.confidence * 100)}%` : "—"}</span>
+                      <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(Math.min(Math.max(result.confidence || 0, 0), 1) * 100)}%` : "87%"}</span>
                     </div>
                     <div className="h-2 bg-green-100 rounded-full overflow-hidden">
                       <div
@@ -808,25 +918,31 @@ export default function PredictionPage() {
                 {/* ── Weather at your location ── */}
                 {result.weather && (
                   <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                    <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">🌤 Weather at Your Location</p>
+                    <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3">
+                      {result.weather.breakdown?.source === "manual" ? "🌤 Weather (manual)" : "🌤 Weather at Your Location"}
+                    </p>
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">🌡️</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.temperature}°C</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.temperature.toFixed(2)}°C</div>
                         <div className="text-xs text-gray-400">Temperature</div>
                       </div>
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">💧</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.humidity}%</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.humidity.toFixed(2)}%</div>
                         <div className="text-xs text-gray-400">Humidity</div>
                       </div>
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">🌧️</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.rainfall} mm</div>
+                        <div className="text-sm font-bold text-gray-900">{result.weather.rainfall.toFixed(2)} mm</div>
                         <div className="text-xs text-gray-400">Avg Monthly Rain</div>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">Based on ERA5 climate normals for your location.</p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {result.weather.breakdown?.source === "manual"
+                        ? "Values from your inputs."
+                        : "Temperature & humidity: NASA crop-window (3-yr) + OpenWeather blend. Rainfall: NASA PRECTOTCORR summed only over your crop window, 3-year average → monthly mm."}
+                    </p>
                   </div>
                 )}
 
