@@ -4,7 +4,7 @@
  */
 export const CROP_INFO = {
   rice: {
-    image: "/images/rice.jpg",
+    image: "/images/cropImages/rice.jpg",
     zoomedImage: "/images/zoomedImages/rice.jpg",
     season: "Kharif",
     water: "High",
@@ -45,7 +45,7 @@ export const CROP_INFO = {
     notes: "Monitor water depth during vegetative growth and manage weeds early to protect yield."
   },
   wheat: {
-    image: "/images/wheat.jpg",
+    image: "/images/cropImages/wheat.jpg",
     zoomedImage: "/images/zoomedImages/wheat.jpg",
     season: "Rabi",
     water: "Medium",
@@ -85,7 +85,7 @@ export const CROP_INFO = {
     notes: "Timely irrigation at critical stages like crown root initiation and grain filling is key."
   },
   maize: {
-    image: "/images/maize.jpg",
+    image: "/images/cropImages/maize.jpg",
     zoomedImage: "/images/zoomedImages/maize.jpg",
     season: "Kharif",
     water: "Medium",
@@ -124,7 +124,7 @@ export const CROP_INFO = {
     notes: "Ensure balanced NPK application and stage-wise irrigation during tasseling and grain filling."
   },
   chickpea: {
-    image: "/images/chickpea.jpg",
+    image: "/images/cropImages/chickpea.jpg",
     zoomedImage: "/images/zoomedImages/chickpea.jpg",
     season: "Rabi",
     water: "Low",
@@ -162,7 +162,7 @@ export const CROP_INFO = {
     notes: "Inoculate seeds with Rhizobium and practice crop rotation to improve soil health."
   },
   "kidney beans": {
-    image: "/images/kidney beans.jpg",
+    image: "/images/cropImages/kidney beans.jpg",
     zoomedImage: "/images/zoomedImages/kidney beans.jpg",
     season: "Kharif",
     water: "Medium",
@@ -200,7 +200,7 @@ export const CROP_INFO = {
     notes: "Provide support for climbing types and avoid waterlogging to prevent root rot."
   },
   "pigeon peas": {
-    image: "/images/pigeon peas.jpg",
+    image: "/image/cropImages/pigeon peas.jpg",
     zoomedImage: "/images/zoomedImages/pigeon peas.jpg",
     season: "Kharif",
     water: "Low",
@@ -239,7 +239,7 @@ export const CROP_INFO = {
     notes: "Plant on ridges or raised beds in heavy soils to improve drainage."
   },
   "moth beans": {
-    image: "/images/moth beans.jpg",
+    image: "/images/cropImages/moth-beans.jpg",
     zoomedImage: "/images/zoomedImages/moth beans.jpg",
     season: "Kharif",
     water: "Low",
@@ -277,7 +277,7 @@ export const CROP_INFO = {
     notes: "Minimal fertilizer is needed; add phosphorus at sowing for best nodulation."
   },
   "mung bean": {
-    image: "/images/mung bean.jpg",
+    image: "/images/cropImages/mung bean.jpg",
     zoomedImage: "/images/zoomedImages/mung bean.jpg",
     season: "Kharif",
     water: "Low",
@@ -315,7 +315,7 @@ export const CROP_INFO = {
     notes: "Good for crop rotation and soil nitrogen improvement with proper inoculation."
   },
   "black gram": {
-    image: "/images/black gram.jpg",
+    image: "/images/cropImages/black gram.jpg",
     zoomedImage: "/images/zoomedImages/black gram.jpg",
     season: "Kharif",
     water: "Low",
@@ -353,7 +353,7 @@ export const CROP_INFO = {
     notes: "Use timely weed management and maintain light irrigation only when necessary."
   },
   lentil: {
-    image: "/images/lentil.jpg",
+    image: "/images/cropImages/lentil.jpg",
     zoomedImage: "/images/zoomedImages/lentil.jpg",
     season: "Rabi",
     water: "Low",
@@ -391,7 +391,7 @@ export const CROP_INFO = {
     notes: "Avoid excess irrigation; lentil performs well on residual soil moisture."
   },
   pomegranate: {
-    image: "/images/pomegranate.jpg",
+    image: "/images/cropImages/pomegranate.jpg",
     zoomedImage: "/images/zoomedImages/pomegranate.jpg",
     season: "Perennial",
     water: "Low",
@@ -428,7 +428,7 @@ export const CROP_INFO = {
     notes: "Manage irrigation carefully; excess moisture can reduce fruit quality."
   },
   banana: {
-    image: "/images/banana.jpg",
+    image: "/images/cropImages/banana.jpg",
     zoomedImage: "/images/zoomedImages/banana.jpg",
     season: "Perennial",
     water: "High",
@@ -465,7 +465,7 @@ export const CROP_INFO = {
     notes: "Maintain frequent irrigation and mulching to keep moisture levels stable."
   },
   mango: {
-    image: "/images/mango.jpg",
+    image: "/images/cropImages/mango.jpg",
     zoomedImage: "/images/zoomedImages/mango.jpg",
     season: "Perennial",
     water: "Low",
@@ -502,7 +502,7 @@ export const CROP_INFO = {
     notes: "Prune after harvest and manage irrigation to avoid alternate bearing."
   },
   grapes: {
-    image: "/images/grapes.jpg",
+    image: "/images/cropImages/grapes.jpg",
     zoomedImage: "/images/zoomedImages/grapes.jpg",
     season: "Perennial",
     water: "Medium",
@@ -539,7 +539,7 @@ export const CROP_INFO = {
     notes: "Train vines carefully to manage canopy and improve sunlight penetration."
   },
   watermelon: {
-    image: "/images/watermelon.jpg",
+    image: "/images/cropImages/watermelon.jpg",
     zoomedImage: "/images/zoomedImages/watermelon.jpg",
     season: "Zaid",
     water: "Medium",
@@ -576,7 +576,7 @@ export const CROP_INFO = {
     notes: "Reduce irrigation 10 days before harvest to concentrate sugars."
   },
   muskmelon: {
-    image: "/images/muskmelon.jpg",
+    image: "/images/cropImages/muskmelon.jpg",
     zoomedImage: "/images/zoomedImages/muskmelon.jpg",
     season: "Zaid",
     water: "Medium",
@@ -613,7 +613,7 @@ export const CROP_INFO = {
     notes: "Keep vines well-trained and harvest promptly when fruit ripens."
   },
   apple: {
-    image: "/images/apple.jpg",
+    image: "/images/cropImages/apple.jpg",
     zoomedImage: "/images/zoomedImages/apple.jpg",
     season: "Rabi",
     water: "Medium",
@@ -650,7 +650,7 @@ export const CROP_INFO = {
     notes: "Manage irrigation and apply protective sprays during blossom and fruit development."
   },
   orange: {
-    image: "/images/orange.jpg",
+    image: "/images/cropImages/orange.jpg",
     zoomedImage: "/images/zoomedImages/orange.jpg",
     season: "Perennial",
     water: "Medium",
@@ -687,7 +687,7 @@ export const CROP_INFO = {
     notes: "Avoid water stress and maintain good orchard sanitation."
   },
   papaya: {
-    image: "/images/papaya.jpg",
+    image: "/images/cropImages/papaya.jpg",
     zoomedImage: "/images/zoomedImages/papaya.jpg",
     season: "Perennial",
     water: "Medium",
@@ -724,7 +724,8 @@ export const CROP_INFO = {
     notes: "Remove diseased plants and maintain drainage to avoid root rot."
   },
   coconut: {
-    image: "/images/coconut.jpg",
+    image: "/images/cropImages/coconut.jpg",
+    zoomedImage: "/images/zoomedImages/coconut.jpg",
     season: "Perennial",
     water: "High",
     ph: "5.5–8.0",
@@ -760,7 +761,8 @@ export const CROP_INFO = {
     notes: "Maintain good drainage and control weeds around palms."
   },
   cotton: {
-    image: "/images/cotton.jpg",
+    image: "/images/cropImages/cotton.jpg",
+    zoomedImage: "/images/zoomedImages/cotton.jpg",
     season: "Kharif",
     water: "Medium",
     ph: "5.8–8.0",
@@ -796,7 +798,8 @@ export const CROP_INFO = {
     notes: "Use integrated pest management to minimize pesticide resistance."
   },
   jute: {
-    image: "/images/jute.jpg",
+    image: "/images/cropImages/jute.jpg",
+    zoomedImage: "/images/zoomedImages/jute.jpg",
     season: "Kharif",
     water: "High",
     ph: "6.0–7.5",
@@ -832,7 +835,8 @@ export const CROP_INFO = {
     notes: "Ret water properly during retting to preserve fiber strength."
   },
   coffee: {
-    image: "/images/coffee.jpg",
+    image: "/images/cropImages/coffee.jpg",
+    zoomedImage: "/images/zoomedImages/coffee.jpg",
     season: "Perennial",
     water: "Medium",
     ph: "6.0–6.5",

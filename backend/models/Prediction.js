@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const predictionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   location: {
-    mode: { type: String, enum: ["map", "details"], required: true },
+    mode: { type: String, enum: ["map", "details", "manual"], required: true },
     latitude: { type: Number, default: null },
     longitude: { type: Number, default: null },
     details: { type: String, default: "" },
@@ -29,6 +29,9 @@ const predictionSchema = new mongoose.Schema({
   // Yield output
   yieldQHa:    { type: Number, default: null },
   totalYieldQ: { type: Number, default: null },
+  actualYieldQ:  { type: Number, default: null },
+  harvestNotes:  { type: String, default: "" },
+  harvestedAt:   { type: Date,   default: null },
 
   createdAt: { type: Date, default: Date.now },
 })

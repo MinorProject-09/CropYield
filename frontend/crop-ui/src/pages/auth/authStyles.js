@@ -1,0 +1,3 @@
+export const inp = "w-full border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800/80 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30 transition placeholder:text-gray-300 dark:placeholder:text-slate-600";
+export const btn = "w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-3 rounded-xl text-sm transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm";
+export const label = "block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1.5";

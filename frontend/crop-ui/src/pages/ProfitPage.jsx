@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getCropInfo } from "../data/cropInfo";
 import { getProfitRank } from "../api/api";
+import CropGuideModal from "../components/CropGuideModal";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 const RANK_MEDAL = ["🥇", "🥈", "🥉", "4️⃣"];
@@ -24,7 +25,7 @@ function inr(n) {
 function ProfitBadge({ value }) {
   const pos = value >= 0;
   return (
-    <span className={`font-bold text-sm ${pos ? "text-green-700 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+    <span className={`font-bold text-sm ${pos ? "text-emerald-700 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
       {pos ? "▲ " : "▼ "}{inr(value)}
     </span>
   );
@@ -58,7 +59,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
         {/* Crop name */}
         <td className="px-3 py-4 whitespace-nowrap">
           <div className="flex items-center gap-2">
-            <img src={info?.image} alt={item.crop} className="w-8 h-8" />
+            <span className="text-2xl">{info?.emoji || "🌾"}</span>
             <div>
               <div className="font-bold text-gray-900 dark:text-slate-100 capitalize text-sm">{item.crop}</div>
               <div className="text-xs text-gray-400 dark:text-slate-500">{info?.season || "—"}</div>
@@ -70,7 +71,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
         <td className="px-3 py-4 text-center">
           {(() => {
             const pct = Math.round((item.suitability_score || 0) * 100);
-            const color = pct >= 80 ? "text-green-700 dark:text-green-400"
+            const color = pct >= 80 ? "text-emerald-700 dark:text-emerald-400"
                         : pct >= 60 ? "text-amber-600 dark:text-amber-400"
                         : "text-red-500";
             const bar   = pct >= 80 ? "bg-green-500" : pct >= 60 ? "bg-amber-400" : "bg-red-400";
@@ -129,7 +130,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
 
         {/* ROI */}
         <td className="px-3 py-4 text-center">
-          <div className={`font-bold text-sm ${item.roi_pct >= 0 ? "text-green-700 dark:text-green-400" : "text-red-500"}`}>
+          <div className={`font-bold text-sm ${item.roi_pct >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-500"}`}>
             {item.roi_pct}%
           </div>
           <div className="text-xs text-gray-400">{t("Return")}</div>
@@ -146,7 +147,7 @@ function CropRow({ item, rank, t, onLearnMore }) {
           <button
             type="button"
             onClick={() => onLearnMore(item)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 px-3 py-1.5 rounded-lg transition"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition"
           >
             📖 {t("Guide")}
           </button>
@@ -179,64 +180,11 @@ function CropRow({ item, rank, t, onLearnMore }) {
   );
 }
 
-/* ── Guide modal (placeholder for future docs) ───────────────────────────── */
-function GuideModal({ item, onClose, t }) {
-  if (!item) return null;
-  const info = getCropInfo(item.crop);
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={info?.image} alt={item.crop} className="w-10 h-10" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 capitalize">{item.crop}</h2>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 text-xl">✕</button>
-        </div>
-
-        {info && (
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {[
-              { label: t("Season"),   value: info.season },
-              { label: t("Water"),    value: info.water },
-              { label: t("Ideal pH"), value: info.ph },
-              { label: t("Duration"), value: `${info.days} ${t("days")}` },
-            ].map(({ label, value }) => (
-              <div key={label} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-2.5 border border-gray-100 dark:border-slate-600">
-                <div className="text-xs text-gray-400 dark:text-slate-500">{label}</div>
-                <div className="font-semibold text-gray-800 dark:text-slate-200 mt-0.5">{value}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {info?.tip && (
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 border border-green-200 dark:border-green-700 text-sm text-gray-700 dark:text-slate-300">
-            💡 {info.tip}
-          </div>
-        )}
-
-        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200 dark:border-amber-700 text-xs text-amber-700 dark:text-amber-400">
-          📄 {t("Full farming guide — coming soon. This section will include step-by-step sowing, irrigation, pest control, and harvesting instructions.")}
-        </div>
-
-        <button
-          onClick={onClose}
-          className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2.5 rounded-xl transition text-sm"
-        >
-          {t("Close")}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 /* ── Page ────────────────────────────────────────────────────────────────── */
 export default function ProfitPage() {
   const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
-
   // Data passed from PredictionPage or Dashboard history via router state
   const { mlInput, top3, farmSizeHa, recommendedCrop, fromHistory, predictionDate, duration } = location.state || {};
 
@@ -271,14 +219,14 @@ export default function ProfitPage() {
   // No data passed — show a friendly message
   if (!mlInput) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+      <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
         <Navbar />
         <div className="max-w-2xl mx-auto px-6 py-20 text-center">
           <p className="text-5xl mb-4">📊</p>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-3">{t("No prediction data found")}</h1>
           <p className="text-gray-500 dark:text-slate-400 mb-6">{t("Run a crop prediction first, then click the Profit Analysis button.")}</p>
           <Link to="/prediction">
-            <button className="bg-green-700 text-white font-semibold px-6 py-3 rounded-xl hover:bg-green-800 transition">
+            <button className="bg-emerald-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-green-800 transition">
               {t("Go to Prediction →")}
             </button>
           </Link>
@@ -289,18 +237,18 @@ export default function ProfitPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+    <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
       <Navbar />
 
-      {guide && <GuideModal item={guide} onClose={() => setGuide(null)} t={t} />}
+      {guide && <CropGuideModal cropName={guide.crop} onClose={() => setGuide(null)} />}
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+      <div className="bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] text-white px-6 py-10">
         <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div>
-            <p className="text-green-300 text-sm mb-1">📊 {t("Profit Analysis")}</p>
+            <p className="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-2">📊 {t("Profit Analysis")}</p>
             <h1 className="text-2xl md:text-3xl font-bold">{t("Which crop earns you the most?")}</h1>
-            <p className="text-green-200 text-sm mt-1">
+            <p className="text-emerald-200/80 text-sm mt-1.5">
               {t("Top 3 crops ranked by net profit — based on your soil, location, and market prices.")}
             </p>
             {recommendedCrop && (
@@ -316,7 +264,7 @@ export default function ProfitPage() {
           </div>
           <button
             onClick={() => navigate(fromHistory ? "/dashboard" : -1)}
-            className="bg-white/20 hover:bg-white/30 border border-white/30 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition"
+            className="bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition"
           >
             ← {t(fromHistory ? "Back to Dashboard" : "Back to Prediction")}
           </button>
@@ -358,21 +306,21 @@ export default function ProfitPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{RANK_MEDAL[idx]}</span>
-                        <img src={info?.image} alt={item.crop} className="w-6 h-6" />
+                        <span className="text-xl">{info?.emoji || "🌾"}</span>
                         <span className="font-bold text-gray-900 dark:text-slate-100 capitalize">{item.crop}</span>
                       </div>
-                      <span className={`text-sm font-bold ${item.profit_current >= 0 ? "text-green-700 dark:text-green-400" : "text-red-600"}`}>
+                      <span className={`text-sm font-bold ${item.profit_current >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-600"}`}>
                         {item.profit_current >= 0 ? "▲" : "▼"} {inr(item.profit_current)}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       {[
-                        { label: t("Soil Fit"),     value: `${Math.round((item.suitability_score||0)*100)}%`, color: item.suitability_score >= 0.8 ? "text-green-700 dark:text-green-400" : item.suitability_score >= 0.6 ? "text-amber-600" : "text-red-500" },
+                        { label: t("Soil Fit"),     value: `${Math.round((item.suitability_score||0)*100)}%`, color: item.suitability_score >= 0.8 ? "text-emerald-700 dark:text-emerald-400" : item.suitability_score >= 0.6 ? "text-amber-600" : "text-red-500" },
                         { label: t("Expenditure"),  value: inr(item.total_cost),       color: "text-red-600 dark:text-red-400" },
-                        { label: t("Return %"),      value: `${item.roi_pct}%`,          color: item.roi_pct >= 0 ? "text-green-700 dark:text-green-400" : "text-red-500" },
+                        { label: t("Return %"),      value: `${item.roi_pct}%`,          color: item.roi_pct >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-500" },
                         { label: t("Last year"),     value: inr(item.profit_prev),       color: item.profit_prev >= 0 ? "text-gray-700 dark:text-slate-200" : "text-red-500" },
-                        { label: t("This year"),     value: inr(item.profit_current),    color: item.profit_current >= 0 ? "text-green-700 dark:text-green-400" : "text-red-500" },
+                        { label: t("This year"),     value: inr(item.profit_current),    color: item.profit_current >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-red-500" },
                         { label: t("Next year est."),value: inr(item.profit_projected),  color: item.profit_projected >= 0 ? "text-blue-700 dark:text-blue-400" : "text-red-500" },
                         { label: t("Price trend"),   value: `${item.price_trend_pct > 0 ? "▲" : "▼"} ${Math.abs(item.price_trend_pct)}%`, color: item.price_trend_pct >= 0 ? "text-green-600" : "text-red-500" },
                       ].map(({ label, value, color }) => (
@@ -386,20 +334,19 @@ export default function ProfitPage() {
                     <button
                       type="button"
                       onClick={() => setGuide(item)}
-                      className="w-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold py-2 rounded-xl transition"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 rounded-xl transition"
                     >
                       📖 {t("Farming Guide")}
-                    </button>
-                  </div>
+                    </button>                  </div>
                 );
               })}
             </div>
 
             {/* ── Desktop table (hidden on mobile) ── */}
-            <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
+            <div className="hidden md:block overflow-x-auto rounded-2xl border border-gray-200 dark:border-slate-700 ">
               <table className="w-full text-sm border-collapse">
                 <thead>
-                  <tr className="bg-green-700 text-white text-xs uppercase tracking-wide">
+                  <tr className="bg-[#0f4c2a] text-white text-xs uppercase tracking-wide">
                     <th className="px-3 py-3 text-center">{t("Rank")}</th>
                     <th className="px-3 py-3 text-left">{t("Crop")}</th>
                     <th className="px-3 py-3 text-center">{t("Soil Fit")}</th>
@@ -429,7 +376,7 @@ export default function ProfitPage() {
             </div>
 
             {/* Market price reference */}
-            <div className="mt-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 shadow-sm">
+            <div className="mt-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 p-5 ">
               <h3 className="text-sm font-bold text-gray-700 dark:text-slate-300 mb-3 uppercase tracking-wide">
                 💰 {t("Market Price Reference (₹ per quintal)")}
               </h3>
@@ -448,7 +395,7 @@ export default function ProfitPage() {
                     {ranked.map(item => (
                       <tr key={item.crop} className="border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30">
                         <td className="py-2 pr-4 font-medium text-gray-800 dark:text-slate-200 capitalize">
-                          <img src={getCropInfo(item.crop)?.image} alt={item.crop} className="w-4 h-4 inline mr-1" /> {item.crop}
+                          {getCropInfo(item.crop)?.emoji} {item.crop}
                         </td>
                         <td className="text-center py-2 px-3 text-gray-600 dark:text-slate-400">₹{item.market_price_prev?.toLocaleString("en-IN")}</td>
                         <td className="text-center py-2 px-3 font-semibold text-gray-900 dark:text-slate-100">₹{item.market_price_current?.toLocaleString("en-IN")}</td>

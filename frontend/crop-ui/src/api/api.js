@@ -46,3 +46,41 @@ export function getGeocodeStatus() {
 }
 
 export default api;
+
+// ── Sensor / IoT API ──────────────────────────────────────────────────────────
+export const postSensorReading      = (data)            => api.post("/api/sensor", data);
+export const getSensorLatest        = ()                => api.get("/api/sensor/latest");
+export const getSensorHistory       = (deviceId, limit) => api.get("/api/sensor/history", { params: { deviceId, limit } });
+export const getSensorAlerts        = ()                => api.get("/api/sensor/alerts");
+export const deleteSensorReading    = (id)              => api.delete(`/api/sensor/${id}`);
+export const getSensorDeviceKey     = ()                => api.get("/api/sensor/device-key");
+export const regenerateSensorDeviceKey = ()             => api.post("/api/sensor/device-key/regenerate");
+
+// ── Weather API ───────────────────────────────────────────────────────────────
+export const getWeatherForecast = (lat, lng) =>
+  api.get("/api/weather", { params: { lat, lng } });
+
+// ── Market Intelligence API ───────────────────────────────────────────────────
+export const getMarketPrices   = (commodity, state) => api.get("/api/market/prices",    { params: { commodity, state } });
+export const getMarketBestTime = (commodity)         => api.get("/api/market/best-time", { params: { commodity } });
+
+// ── Community API ─────────────────────────────────────────────────────────────
+export const getCommunityPosts    = (params)       => api.get("/api/community/posts", { params });
+export const getCommunityPost     = (id)           => api.get(`/api/community/posts/${id}`);
+export const createCommunityPost  = (data)         => {
+  // Support FormData for image uploads
+  if (data instanceof FormData) return api.post("/api/community/posts", data);
+  return api.post("/api/community/posts", data);
+};
+export const upvoteCommunityPost  = (id)           => api.post(`/api/community/posts/${id}/upvote`);
+export const addCommunityAnswer   = (id, body)     => api.post(`/api/community/posts/${id}/answers`, { body });
+export const upvoteCommunityAnswer= (id, aid)      => api.post(`/api/community/posts/${id}/answers/${aid}/upvote`);
+export const deleteCommunityPost  = (id)           => api.delete(`/api/community/posts/${id}`);
+
+// ── Notifications API ─────────────────────────────────────────────────────────
+export const getNotifications    = ()    => api.get("/api/notifications");
+export const markAllNotifRead    = ()    => api.post("/api/notifications/read-all");
+export const markNotifRead       = (id)  => api.post(`/api/notifications/${id}/read`);
+
+// ── Farm Fields API ───────────────────────────────────────────────────────────
+export const saveFields = (fields) => api.put("/api/auth/fields", { fields });

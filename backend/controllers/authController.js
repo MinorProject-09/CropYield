@@ -125,7 +125,13 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Accept email or username in the email field
+    const identifier = (email || "").trim();
+    const isEmail = identifier.includes("@");
+    const user = isEmail
+      ? await User.findOne({ email: identifier })
+      : await User.findOne({ name: identifier });
+
     if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -139,7 +145,7 @@ exports.login = async (req, res) => {
       return res.status(403).json({
         message: "Please verify your email before logging in.",
         requiresVerification: true,
-        email,
+        email: user.email,
       });
     }
 
@@ -204,13 +210,15 @@ exports.resetPassword = async (req, res) => {
 // ── Update Profile ────────────────────────────────────────────────────────────
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, farmSize, soilType, location } = req.body;
+    const { name, farmSize, soilType, location, phone, smsAlerts } = req.body;
     const updates = {};
     if (name?.trim()) updates.name = name.trim();
     if (farmSize !== undefined) updates.farmSize = farmSize === "" ? undefined : Number(farmSize);
     if (soilType !== undefined) updates.soilType = soilType;
     if (location?.state !== undefined) updates["location.state"] = location.state;
     if (location?.district !== undefined) updates["location.district"] = location.district;
+    if (phone !== undefined) updates.phone = phone.replace(/\D/g, "").slice(-10);
+    if (smsAlerts !== undefined) updates.smsAlerts = Boolean(smsAlerts);
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -221,6 +229,22 @@ exports.updateProfile = async (req, res) => {
     res.json({ user });
   } catch (err) {
     console.error("❌ updateProfile error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ── Save Farm Fields ──────────────────────────────────────────────────────────
+exports.saveFields = async (req, res) => {
+  try {
+    const { fields } = req.body;
+    if (!Array.isArray(fields)) return res.status(400).json({ message: "fields must be an array" });
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { fields } },
+      { new: true }
+    ).select("fields");
+    res.json({ fields: user.fields });
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
