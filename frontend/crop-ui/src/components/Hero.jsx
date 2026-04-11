@@ -3,9 +3,10 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../i18n/LanguageContext";
 
 const stats = [
-  { value: "92%", labelKey: "Prediction Accuracy" },
-  { value: "21+", labelKey: "Crop Types Supported" },
-  { value: "",labelKey: "Farmers Empowered" },
+  { value: "99%", labelKey: "Prediction Accuracy" },
+  { value: "22+", labelKey: "Crop Types Supported" },
+  { value: "12+", labelKey: "Multi-language Support" },
+  { value: "8+", labelKey: "Integrated Services" },
 ];
 
 function Hero() {

@@ -882,21 +882,24 @@ export default function PredictionPage() {
 
                 {/* ── Recommended crop ── */}
                 <div className="rounded-xl border border-green-300 bg-gradient-to-br from-green-50 to-emerald-50/80 p-5">
-                  <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("Recommended crop")}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-3xl font-bold text-gray-900 capitalize">
-                    <div className="flex items-center gap-2">
-                      <span className="text-4xl">{getCropInfo(result.recommendedCrop)?.emoji || "🌾"}</span>
-                      <span>{result.recommendedCrop || "—"}</span>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium uppercase tracking-wider text-green-800">{t("Recommended crop")}</p>
                     <button
-                      type="button"
-                      onClick={() => setGuideModal(result.recommendedCrop)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-green-300 hover:text-green-700"
-                      aria-label={`View guide for ${result.recommendedCrop}`}
-                      title="View farming guide"
-                    >
-                      <HiOutlineInformationCircle className="h-5 w-5" />
-                    </button>
+                        type="button"
+                        onClick={() => setGuideModal(result.recommendedCrop)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:border-green-300 hover:text-green-700"
+                        aria-label={`View guide for ${result.recommendedCrop}`}
+                        title="View farming guide"
+                      >
+                        <HiOutlineInformationCircle className="h-5 w-5" />
+                      </button>
+                    </div>
+                  <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-3xl font-bold text-gray-900 capitalize">
+                    <div className="flex flex-col justify-center items-center gap-2">
+                      <span>{result.recommendedCrop || "—"}</span>
+                      <img src={getCropInfo(result.recommendedCrop)?.zoomedImage} alt={result.recommendedCrop} className="w-60 rounded-xl h-auto" />
+                    </div>
+                   
               
                   </div>
                   <div className="mt-3">
@@ -1031,7 +1034,7 @@ export default function PredictionPage() {
                       {result.top3.slice(1).map((alt) => (
                         <div key={alt.crop} className="flex items-center justify-between gap-3 text-sm">
                           <div className="flex items-center gap-2 capitalize text-gray-700">
-                            <span className="text-lg">{getCropInfo(alt.crop)?.emoji || "🌾"}</span>
+                            <span className="text-lg"><img src={getCropInfo(alt.crop)?.image} alt={alt.crop} className="w-6 h-6" /></span>
                             <span>{alt.crop}</span>
                             <button
                               type="button"

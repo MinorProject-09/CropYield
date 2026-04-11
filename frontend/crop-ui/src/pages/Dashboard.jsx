@@ -69,7 +69,7 @@ function OverviewTab({ user, history, historyLoading }) {
         {[
           { icon: "🌾", label: t("Total Predictions"), value: history.length, color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700" },
           { icon: "✅", label: t("Harvests Logged"),   value: history.filter(p => p.actualYieldQ != null).length, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" },
-          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.emoji || "🌾") + " " + history[0].recommendedCrop : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
+          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.image || "🌾") + " " + history[0].recommendedCrop : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
           { icon: "📈", label: t("Avg Confidence"),    value: history.length ? Math.round(history.reduce((s, p) => s + p.confidence, 0) / history.length * 100) + "%" : "—", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700" },
         ].map(({ icon, label, value, color }) => (
           <div key={label} className={`rounded-2xl border p-4 ${color}`}>
@@ -192,8 +192,8 @@ function HistoryTab({ history, loading, onDelete, setHistory }) {
         return (
           <div key={p._id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:border-green-200 dark:hover:border-green-700 transition">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
-                {info?.emoji || "🌾"}
+              <div className="w-40 h-20 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0"> 
+                <img src={info.image} className='w-40 h-20' alt={p.recommendedCrop}></img>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">

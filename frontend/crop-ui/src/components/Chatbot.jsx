@@ -22,8 +22,8 @@ export default function Chatbot() {
   const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
-  const { lang, currentLang, t, speechCode } = useLanguage();
-
+  let { lang, currentLang, t, speechCode } = useLanguage();
+  lang = "english"
   const removeAttachment = (index) => {
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
@@ -196,7 +196,7 @@ export default function Chatbot() {
 
           <div className="flex border-t border-green-100 bg-white p-1.5 gap-1 shrink-0 items-center">
             <VoiceInput
-              speechCode={speechCode || "hi-IN"}
+              speechCode={speechCode || "en-IN"}
               disabled={loading}
               onResult={(transcript) =>
                 setMessage((prev) => (prev ? `${prev} ${transcript}` : transcript))

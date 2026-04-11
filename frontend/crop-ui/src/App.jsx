@@ -10,7 +10,6 @@ import VerifyEmail from "./pages/auth/VerifyEmail"
 import ForgotPassword from "./pages/auth/ForgotPassword"
 import ResetPassword from "./pages/auth/ResetPassword"
 import CropCalendar from "./pages/CropCalendar"
-import CropDetailPage from "./pages/CropDetailPage"
 import IoTDashboard from "./pages/IoTDashboard"
 import SchemeFinder from "./pages/SchemeFinder"
 import WeatherPage from "./pages/WeatherPage"
@@ -51,11 +50,6 @@ function App() {
           <Route path="/profit" element={
             <ProtectedRoute>
               <ProfitPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/crop/:cropName" element={
-            <ProtectedRoute>
-              <CropDetailPage />
             </ProtectedRoute>
           } />
           <Route path="/iot" element={
