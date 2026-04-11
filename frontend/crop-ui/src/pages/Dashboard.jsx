@@ -10,6 +10,9 @@ import { getCropInfo } from "../data/cropInfo";
 import { MSP_2024 } from "../data/mspData";
 import YieldTracker from "../components/YieldTracker";
 import FarmAdvisor from "../components/FarmAdvisor";
+import SeasonalPlanner from "../components/SeasonalPlanner";
+import FarmMap from "../components/FarmMap";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 
 const SOIL_TYPES = ["Sandy", "Loamy", "Clay", "Silt", "Peaty", "Chalky", "Sandy Loam", "Clay Loam", "Other"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -65,17 +68,18 @@ function OverviewTab({ user, history, historyLoading }) {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger">
         {[
-          { icon: "🌾", label: t("Total Predictions"), value: history.length, color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700" },
-          { icon: "✅", label: t("Harvests Logged"),   value: history.filter(p => p.actualYieldQ != null).length, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" },
-          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.emoji || "🌾") + " " + history[0].recommendedCrop : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
-          { icon: "📈", label: t("Avg Confidence"),    value: history.length ? Math.round(history.reduce((s, p) => s + p.confidence, 0) / history.length * 100) + "%" : "—", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700" },
+          { icon: "🌾", label: t("Total Predictions"), value: history.length,                                                                                  color: "#16a34a" },
+          { icon: "✅", label: t("Harvests Logged"),   value: history.filter(p => p.actualYieldQ != null).length,                                              color: "#0ea5e9" },
+          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.emoji || "🌾") + " " + history[0].recommendedCrop : "—", color: "#f59e0b" },
+          { icon: "📈", label: t("Avg Confidence"),    value: history.length ? Math.round(history.reduce((s, p) => s + p.confidence, 0) / history.length * 100) + "%" : "—", color: "#8b5cf6" },
         ].map(({ icon, label, value, color }) => (
-          <div key={label} className={`rounded-2xl border p-4 ${color}`}>
-            <div className="text-xl mb-1">{icon}</div>
-            <div className="font-bold text-gray-900 dark:text-slate-100 text-sm capitalize">{value}</div>
-            <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{label}</div>
+          <div key={label} className="stat-card animate-fade-up">
+            <div className="absolute top-0 right-0 w-16 h-16 rounded-full -translate-y-4 translate-x-4" style={{ background: color, opacity: 0.08 }} />
+            <div className="text-2xl mb-2">{icon}</div>
+            <div className="font-extrabold text-gray-900 dark:text-slate-100 text-lg capitalize truncate">{value}</div>
+            <div className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 font-medium">{label}</div>
           </div>
         ))}
       </div>
@@ -83,12 +87,17 @@ function OverviewTab({ user, history, historyLoading }) {
       {/* Personalized farm advisor */}
       <FarmAdvisor user={user} history={history} />
 
+      {/* Seasonal planner for most recent prediction */}
+      {history.length > 0 && (
+        <SeasonalPlanner prediction={history[0]} />
+      )}
+
       {/* Daily tip */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4 items-start">
-        <span className="text-2xl">{tip.icon}</span>
+      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-5 flex gap-4 items-start">
+        <span className="text-2xl flex-shrink-0">{tip.icon}</span>
         <div>
-          <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">{t("Farming Tip of the Day")}</p>
-          <p className="text-gray-700 text-sm leading-relaxed">{t(tip.tip)}</p>
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1">{t("Farming Tip of the Day")}</p>
+          <p className="text-gray-700 dark:text-slate-300 text-sm leading-relaxed">{t(tip.tip)}</p>
         </div>
       </div>
     </div>
@@ -190,7 +199,7 @@ function HistoryTab({ history, loading, onDelete, setHistory }) {
         } : null;
 
         return (
-          <div key={p._id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:border-green-200 dark:hover:border-green-700 transition">
+          <div key={p._id} className="card rounded-2xl p-5  hover:border-green-200 dark:hover:border-green-700 transition">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0">
                 {info?.emoji || "🌾"}
@@ -267,14 +276,40 @@ function HistoryTab({ history, loading, onDelete, setHistory }) {
   );
 }
 
+// ── Push Notification Toggle ──────────────────────────────────────────────────
+function PushToggle() {
+  const { supported, subscribed, loading, subscribe, unsubscribe } = usePushNotifications();
+  if (!supported) return null;
+  return (
+    <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 rounded-xl px-4 py-3 sm:col-span-2">
+      <div>
+        <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">🔔 Browser Push Notifications</p>
+        <p className="text-xs text-blue-600 dark:text-blue-500 mt-0.5">
+          {subscribed ? "Enabled — you'll get alerts even when the tab is closed" : "Get instant alerts in your browser for critical events"}
+        </p>
+      </div>
+      <button type="button" onClick={subscribed ? unsubscribe : subscribe} disabled={loading}
+        className={`text-xs font-semibold px-4 py-2 rounded-xl transition disabled:opacity-50 ${
+          subscribed
+            ? "bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-300"
+            : "bg-blue-600 hover:bg-blue-700 text-white"
+        }`}>
+        {loading ? "…" : subscribed ? "Disable" : "Enable"}
+      </button>
+    </div>
+  );
+}
+
 // ── Profile Tab ───────────────────────────────────────────────────────────────
 function ProfileTab({ user, setUser }) {
   const [form, setForm] = useState({
-    name: user?.name || "",
-    farmSize: user?.farmSize ?? "",
-    soilType: user?.soilType || "",
-    state: user?.location?.state || "",
-    district: user?.location?.district || "",
+    name:      user?.name || "",
+    farmSize:  user?.farmSize ?? "",
+    soilType:  user?.soilType || "",
+    state:     user?.location?.state || "",
+    district:  user?.location?.district || "",
+    phone:     user?.phone || "",
+    smsAlerts: user?.smsAlerts ?? false,
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
@@ -283,22 +318,22 @@ function ProfileTab({ user, setUser }) {
   const districts = DISTRICTS_BY_STATE[form.state] || [];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm(f => ({ ...f, [name]: type === "checkbox" ? checked : value }));
     if (name === "state") setForm(f => ({ ...f, state: value, district: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    setError("");
-    setSuccess("");
+    setSaving(true); setError(""); setSuccess("");
     try {
       const res = await updateProfile({
-        name: form.name,
-        farmSize: form.farmSize,
-        soilType: form.soilType,
-        location: { state: form.state, district: form.district },
+        name:      form.name,
+        farmSize:  form.farmSize,
+        soilType:  form.soilType,
+        location:  { state: form.state, district: form.district },
+        phone:     form.phone,
+        smsAlerts: form.smsAlerts,
       });
       setUser(res.data.user);
       setSuccess("Profile updated successfully.");
@@ -310,24 +345,23 @@ function ProfileTab({ user, setUser }) {
     }
   };
 
-  const inputCls = "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 transition bg-white";
+  const inputCls = "w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-700/60 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30 transition placeholder:text-gray-300 dark:placeholder:text-slate-500";
   const selectCls = `${inputCls} appearance-none`;
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+    <div className="card rounded-2xl  overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 py-5 flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl font-bold text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] px-6 py-6 flex items-center gap-4">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #86efac 0%, transparent 50%)" }} />
+        <div className="relative w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
           {user?.name?.[0]?.toUpperCase() || "?"}
         </div>
-        <div>
-          <p className="text-white font-semibold text-lg">{user?.name}</p>
-          <p className="text-green-200 text-sm">{user?.email}</p>
-          <div className="flex gap-2 mt-1">
+        <div className="relative">
+          <p className="text-white font-bold text-lg leading-tight">{user?.name}</p>
+          <p className="text-emerald-200 text-sm">{user?.email}</p>
+          <div className="flex gap-2 mt-1.5">
             <Badge color="green">{user?.provider || "local"}</Badge>
-            {user?.emailVerified
-              ? <Badge color="green">✓ Verified</Badge>
-              : <Badge color="amber">✗ Unverified</Badge>}
+            {user?.emailVerified ? <Badge color="green">✓ Verified</Badge> : <Badge color="amber">✗ Unverified</Badge>}
           </div>
         </div>
       </div>
@@ -393,6 +427,28 @@ function ProfileTab({ user, setUser }) {
               <input name="district" value={form.district} onChange={handleChange} className={inputCls} placeholder="Enter district" />
             )}
           </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">📱 Mobile Number</label>
+            <input name="phone" type="tel" value={form.phone} onChange={handleChange}
+              className={inputCls} placeholder="10-digit mobile (for SMS alerts)" maxLength={10} />
+          </div>
+
+          {/* SMS Alerts toggle */}
+          <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">📲 WhatsApp/SMS Alerts</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">Get critical soil and weather alerts on your phone</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="smsAlerts" checked={form.smsAlerts} onChange={handleChange} className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:bg-emerald-600 transition-all after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5" />
+            </label>
+          </div>
+
+          {/* Push Notifications toggle */}
+          <PushToggle />
         </div>
 
         {error   && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">⚠ {error}</p>}
@@ -402,12 +458,15 @@ function ProfileTab({ user, setUser }) {
           <button
             type="submit"
             disabled={saving}
-            className="bg-green-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl hover:bg-green-800 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-emerald-600 text-white font-semibold text-sm px-6 py-2.5 rounded-xl hover:bg-emerald-700 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {saving ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Saving…</> : "Save Changes"}
           </button>
         </div>
       </form>
+
+      {/* Farm Map */}
+      <FarmMap user={user} onFieldsSaved={(fields) => setUser(u => ({ ...u, fields }))} />
     </div>
   );
 }
@@ -436,7 +495,7 @@ function MSPTab() {
               {crops.map(([crop, data]) => {
                 const info = getCropInfo(crop);
                 return (
-                  <div key={crop} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3 shadow-sm hover:border-green-200 transition">
+                  <div key={crop} className="bg-white border border-gray-100 rounded-xl p-4 flex items-center gap-3  hover:border-green-200 transition">
                     <span className="text-2xl">{info?.emoji || "🌾"}</span>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 capitalize text-sm">{crop.replace(/([a-z])([A-Z])/g, "$1 $2")}</p>
@@ -488,46 +547,46 @@ export default function Dashboard() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <main className="min-h-screen bg-page">
 
         {/* Hero */}
-        <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
-          <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
+        <div className="page-hero noise">
+          <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4 relative">
             <div>
-              <p className="text-green-300 text-sm mb-1">{t("Dashboard")}</p>
-              <h1 className="text-2xl md:text-3xl font-bold">
+              <div className="section-label" style={{ color: "#86efac" }}>Dashboard</div>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-white mt-1">
                 {t("Welcome back")}, {user?.name?.split(" ")[0] || t("Farmer")} 👋
               </h1>
-              <p className="text-green-200 text-sm mt-1">
+              <p className="text-emerald-200/70 text-sm mt-2">
                 {history.length > 0
-                  ? t(`You have ${history.length} prediction${history.length > 1 ? "s" : ""} so far.`)
+                  ? `${history.length} prediction${history.length > 1 ? "s" : ""} so far.`
                   : t("Run your first prediction to get started.")}
               </p>
             </div>
             <Link to="/prediction">
-              <button className="bg-white text-green-800 font-bold px-5 py-2.5 rounded-xl hover:bg-green-50 transition shadow text-sm">
+              <button className="btn-primary text-sm px-6 py-3">
                 🌾 {t("New Prediction →")}
               </button>
             </Link>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           {/* Tabs */}
-          <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-6 w-fit shadow-sm">
+          <div className="flex gap-0.5 bg-gray-100 dark:bg-slate-800/60 rounded-xl p-1 mb-7 w-fit border border-gray-200 dark:border-slate-700/60">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   activeTab === tab.id
-                    ? "bg-green-700 text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                    ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 "
+                    : "text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200"
                 }`}
               >
                 {t(tab.labelKey)}
                 {tab.id === "history" && history.length > 0 && (
-                  <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === "history" ? "bg-white/20 text-white" : "bg-green-100 text-green-700"}`}>
+                  <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === "history" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400" : "bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400"}`}>
                     {history.length}
                   </span>
                 )}

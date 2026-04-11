@@ -47,14 +47,14 @@ function checkEligibility(scheme, profile) {
 function SchemeCard({ scheme, eligibility, t }) {
   const [open, setOpen] = useState(false);
   const statusStyle = {
-    eligible:   { bg: "bg-green-50 dark:bg-green-900/20",  border: "border-green-300 dark:border-green-700",  badge: "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300",  label: "✅ Eligible" },
+    eligible:   { bg: "bg-emerald-50 dark:bg-emerald-900/20",  border: "border-emerald-300 dark:border-emerald-700",  badge: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300",  label: "✅ Eligible" },
     ineligible: { bg: "bg-red-50 dark:bg-red-900/20",      border: "border-red-200 dark:border-red-800",      badge: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400",          label: "❌ Not Eligible" },
     likely:     { bg: "bg-amber-50 dark:bg-amber-900/20",  border: "border-amber-200 dark:border-amber-700",  badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300",  label: "🟡 Likely Eligible" },
     unknown:    { bg: "bg-white dark:bg-slate-800",         border: "border-gray-100 dark:border-slate-700",   badge: "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400",       label: "❓ Check Eligibility" },
   }[eligibility] || {};
 
   return (
-    <div className={`rounded-2xl border ${statusStyle.border} ${statusStyle.bg} shadow-sm overflow-hidden transition`}>
+    <div className={`rounded-2xl border ${statusStyle.border} ${statusStyle.bg}  overflow-hidden transition`}>
       {/* Header */}
       <button type="button" onClick={() => setOpen(v => !v)}
         className="w-full text-left p-5">
@@ -117,13 +117,13 @@ function SchemeCard({ scheme, eligibility, t }) {
           <div className="flex gap-2 flex-wrap">
             <a href={scheme.applyUrl} target="_blank" rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-green-700 hover:bg-green-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">
+              className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">
               📝 {t("Apply Now")} ↗
             </a>
             {scheme.checkUrl && (
               <a href={scheme.checkUrl} target="_blank" rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex-1 flex items-center justify-center gap-1.5 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition">
+                className="flex-1 flex items-center justify-center gap-1.5 border border-emerald-300 dark:border-emerald-700 text-green-700 dark:text-green-400 text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition">
                 🔍 {t("Check Status")} ↗
               </a>
             )}
@@ -152,7 +152,7 @@ function EligibilityQuiz({ profile, setProfile, t }) {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl p-5 shadow-sm space-y-4">
+    <div className="card rounded-2xl p-5  space-y-4">
       <div>
         <h3 className="font-bold text-gray-800 dark:text-slate-200 text-sm uppercase tracking-wide">
           🎯 {t("Check Your Eligibility")}
@@ -173,7 +173,7 @@ function EligibilityQuiz({ profile, setProfile, t }) {
                     onClick={() => setProfile(p => ({ ...p, [q.key]: v, answered: true }))}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                       profile[q.key] === v
-                        ? "bg-green-700 text-white border-green-700"
+                        ? "bg-emerald-600 text-white border-emerald-600"
                         : "bg-white dark:bg-slate-700 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-600 hover:border-green-300"
                     }`}>
                     {v ? t("Yes") : t("No")}
@@ -184,7 +184,7 @@ function EligibilityQuiz({ profile, setProfile, t }) {
               <select
                 value={profile[q.key] || ""}
                 onChange={e => setProfile(p => ({ ...p, [q.key]: e.target.value, answered: true }))}
-                className="text-xs border border-gray-200 dark:border-slate-600 rounded-lg px-2 py-1.5 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 outline-none focus:border-green-500 flex-shrink-0">
+                className="text-xs border border-gray-200 dark:border-slate-600 rounded-lg px-2 py-1.5 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 outline-none focus:border-emerald-500 flex-shrink-0">
                 <option value="">{t("Select")}</option>
                 {q.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
@@ -194,7 +194,7 @@ function EligibilityQuiz({ profile, setProfile, t }) {
       </div>
 
       {profile.answered && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl px-3 py-2 text-xs text-green-800 dark:text-green-300">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-green-200 dark:border-green-700 rounded-xl px-3 py-2 text-xs text-green-800 dark:text-green-300">
           ✅ {t("Eligibility updated. Scroll down to see your results.")}
         </div>
       )}
@@ -243,15 +243,15 @@ export default function SchemeFinder() {
   [profile.answered, effectiveProfile]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 font-[Outfit,system-ui,sans-serif]">
+    <div className="min-h-screen bg-page font-[Outfit,system-ui,sans-serif]">
       <Navbar />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-800 to-green-700 text-white px-6 py-10">
+      <div className="bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#15803d] text-white px-6 py-10">
         <div className="max-w-5xl mx-auto">
-          <p className="text-green-300 text-sm mb-1">🏛️ {t("Government Schemes")}</p>
+          <p className="text-emerald-300 text-xs font-semibold uppercase tracking-widest mb-2">🏛️ {t("Government Schemes")}</p>
           <h1 className="text-2xl md:text-3xl font-bold">{t("Scheme Finder")}</h1>
-          <p className="text-green-200 text-sm mt-1 max-w-xl">
+          <p className="text-emerald-200/80 text-sm mt-1.5 max-w-xl">
             {t("Find all government schemes you are eligible for — PM-KISAN, crop insurance, Kisan Credit Card, subsidies, and more.")}
           </p>
           {eligibleCount !== null && (
@@ -274,7 +274,7 @@ export default function SchemeFinder() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={t("Search schemes… e.g. insurance, irrigation, organic")}
-            className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/30"
+            className="w-full border border-gray-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900/30"
           />
           <div className="flex gap-2 flex-wrap">
             {[{ id:"all", label:t("All"), icon:"📋" },
@@ -291,7 +291,7 @@ export default function SchemeFinder() {
               <button key={c.id} type="button" onClick={() => setCategory(c.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
                   category === c.id
-                    ? "bg-green-700 text-white border-green-700"
+                    ? "bg-emerald-600 text-white border-emerald-600"
                     : "bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:border-green-300"
                 }`}>
                 {c.icon} {c.label}
@@ -304,7 +304,7 @@ export default function SchemeFinder() {
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-slate-400">
           <span>{filtered.length} {t("schemes found")}</span>
           {profile.answered && (
-            <span className="text-green-700 dark:text-green-400 font-semibold">
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
               {filtered.filter(s => checkEligibility(s, effectiveProfile) === "eligible").length} {t("you qualify for")}
             </span>
           )}

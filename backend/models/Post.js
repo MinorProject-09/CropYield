@@ -7,6 +7,7 @@ const answerSchema = new mongoose.Schema({
   upvotes:   { type: Number, default: 0 },
   upvotedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   isExpert:  { type: Boolean, default: false },
+  isAgronomist: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -22,6 +23,7 @@ const postSchema = new mongoose.Schema({
   views:     { type: Number, default: 0 },
   answers:   [answerSchema],
   solved:    { type: Boolean, default: false },
+  images:    [{ type: String }],          // uploaded image paths
   createdAt: { type: Date, default: Date.now },
 });
 

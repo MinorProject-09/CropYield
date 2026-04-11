@@ -79,6 +79,24 @@ exports.ingestReading = async (req, res) => {
       io.to(`user:${req.user._id}`).emit("sensor:update", { reading, alerts });
     }
 
+    // ✅ SMS alert for critical readings
+    const { sendSoilAlertSMS } = require("../utils/smsAlert");
+    await sendSoilAlertSMS(req.user, alerts);
+
+    // ✅ Push notification for critical readings
+    const critical = alerts.filter(a => a.level === "critical");
+    if (critical.length > 0) {
+      const pushRouter = req.app._router?.stack?.find(l => l.regexp?.test("/api/push"))?.handle;
+      if (pushRouter?.sendToUser) {
+        await pushRouter.sendToUser(
+          req.user._id,
+          "🔴 Critical Soil Alert",
+          critical.map(a => a.message).join(" | "),
+          "/iot"
+        );
+      }
+    }
+
     res.status(201).json({ reading, alerts });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -63,6 +64,9 @@ require("./config/passport");
 // Health check
 app.get("/", (req, res) => res.json({ status: "Crop Yield Prediction API Running 🌾" }));
 
+// Serve uploaded community images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
 app.use("/api/auth",           require("./routes/authRoutes"));
 app.use("/api/ml/prediction",  require("./routes/predictionRoutes"));
@@ -72,6 +76,8 @@ app.use("/api/sensor",         require("./routes/sensorRoutes"));
 app.use("/api/weather",        require("./routes/weatherRoutes"));
 app.use("/api/market",         require("./routes/marketRoutes"));
 app.use("/api/community",      require("./routes/communityRoutes"));
+app.use("/api/notifications",  require("./routes/notificationRoutes"));
+app.use("/api/push",           require("./routes/pushRoutes"));
 
 // ✅ Socket.IO — farmers join their own room by userId
 io.on("connection", (socket) => {
