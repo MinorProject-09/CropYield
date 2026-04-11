@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../i18n/LanguageContext";
 
-const CROPS = ["Rice 🌾","Wheat 🌿","Maize 🌽","Banana 🍌","Mango 🥭","Coffee ☕","Grapes 🍇","Cotton 🌿"];
-const STATS = [
-  { value: "99.7%", label: "Model Accuracy",    icon: "🎯" },
-  { value: "22",    label: "Crops Supported",   icon: "🌱" },
-  { value: "7",     label: "Soil Parameters",   icon: "🧪" },
-  { value: "Live",  label: "IoT Monitoring",    icon: "📡" },
+const stats = [
+  { value: "99%", labelKey: "Prediction Accuracy" },
+  { value: "22+", labelKey: "Crop Types Supported" },
+  { value: "12+", labelKey: "Multi-language Support" },
+  { value: "8+", labelKey: "Integrated Services" },
 ];
 
 function FloatingCrop({ emoji, style }) {

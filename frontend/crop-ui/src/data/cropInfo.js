@@ -798,7 +798,8 @@ export const CROP_INFO = {
     notes: "Use integrated pest management to minimize pesticide resistance."
   },
   jute: {
-    image: "/images/jute.jpg",
+    image: "/images/cropImages/jute.jpg",
+    zoomedImage: "/images/zoomedImages/jute.jpg",
     season: "Kharif",
     water: "High",
     ph: "6.0–7.5",
@@ -834,7 +835,8 @@ export const CROP_INFO = {
     notes: "Ret water properly during retting to preserve fiber strength."
   },
   coffee: {
-    image: "/images/coffee.jpg",
+    image: "/images/cropImages/coffee.jpg",
+    zoomedImage: "/images/zoomedImages/coffee.jpg",
     season: "Perennial",
     water: "Medium",
     ph: "6.0–6.5",
