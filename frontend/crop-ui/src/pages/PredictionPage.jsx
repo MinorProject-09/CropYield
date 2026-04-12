@@ -899,7 +899,12 @@ export default function PredictionPage() {
                   <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-3xl font-bold text-gray-900 capitalize">
                     <div className="flex flex-col justify-center items-center gap-2">
                       <span>{result.recommendedCrop || "—"}</span>
-                      <img src={getCropInfo(result.recommendedCrop)?.zoomedImage} alt={result.recommendedCrop} className="w-60 rounded-xl h-auto" />
+                      {(() => {
+                        const zi = getCropInfo(result.recommendedCrop)?.zoomedImage;
+                        return zi ? (
+                          <img src={zi} alt={result.recommendedCrop} className="w-60 rounded-xl h-auto" />
+                        ) : null;
+                      })()}
                     </div>
                    
               
@@ -907,7 +912,7 @@ export default function PredictionPage() {
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-gray-600 mb-1">
                       <span>{t("Confidence")}</span>
-                      <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(Math.min(Math.max(result.confidence || 0, 0), 1) * 100)}%` : "87%"}</span>
+                      <span className="font-semibold">{typeof result.confidence === "number" ? `${Math.round(Math.min(Math.max(result.confidence || 0, 0), 1) * 100)}%` : "—"}</span>
                     </div>
                     <div className="h-2 bg-green-100 rounded-full overflow-hidden">
                       <div
@@ -927,17 +932,17 @@ export default function PredictionPage() {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">🌡️</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.temperature.toFixed(2)}°C</div>
+                        <div className="text-sm font-bold text-gray-900">{Number.isFinite(Number(result.weather.temperature)) ? Number(result.weather.temperature).toFixed(2) : "—"}°C</div>
                         <div className="text-xs text-gray-400">Temperature</div>
                       </div>
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">💧</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.humidity.toFixed(2)}%</div>
+                        <div className="text-sm font-bold text-gray-900">{Number.isFinite(Number(result.weather.humidity)) ? Number(result.weather.humidity).toFixed(2) : "—"}%</div>
                         <div className="text-xs text-gray-400">Humidity</div>
                       </div>
                       <div className="bg-white rounded-lg p-2.5 border border-blue-100">
                         <div className="text-xl mb-1">🌧️</div>
-                        <div className="text-sm font-bold text-gray-900">{result.weather.rainfall.toFixed(2)} mm</div>
+                        <div className="text-sm font-bold text-gray-900">{Number.isFinite(Number(result.weather.rainfall)) ? Number(result.weather.rainfall).toFixed(2) : "—"} mm</div>
                         <div className="text-xs text-gray-400">Avg Monthly Rain</div>
                       </div>
                     </div>
@@ -1033,10 +1038,19 @@ export default function PredictionPage() {
                   <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">🔁 Alternatives</p>
                     <div className="space-y-2">
-                      {result.top3.slice(1).map((alt) => (
+                      {result.top3.slice(1).map((alt) => {
+                        const altInfo = getCropInfo(alt.crop);
+                        const altImg = altInfo?.image;
+                        return (
                         <div key={alt.crop} className="flex items-center justify-between gap-3 text-sm">
                           <div className="flex items-center gap-2 capitalize text-gray-700">
-                            <span className="text-lg"><img src={getCropInfo(alt.crop)?.image} alt={alt.crop} className="w-6 h-6" /></span>
+                            <span className="text-lg">
+                              {altImg ? (
+                                <img src={altImg} alt={alt.crop} className="w-6 h-6 object-cover rounded" />
+                              ) : (
+                                <span className="inline-flex w-6 h-6 items-center justify-center text-base" aria-hidden>🌾</span>
+                              )}
+                            </span>
                             <span>{alt.crop}</span>
                             <button
                               type="button"
@@ -1050,7 +1064,8 @@ export default function PredictionPage() {
                           </div>
                           <span className="text-xs font-semibold text-gray-500">{Math.round(alt.confidence * 100)}%</span>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

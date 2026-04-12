@@ -405,13 +405,6 @@ exports.predictCropYield = async (req, res) => {
       }
     }
 
-    const fiveDay = forecastResp.data.list.reduce(
-      (acc, slot) => acc + (slot.rain?.["3h"] || 0), 0
-    );
-    const monthlyAvg = fiveDay * 6; // scale 5-day total → ~monthly
-    const rainfall = Math.min(298, Math.max(20, Math.round(monthlyAvg * 10) / 10));
-    console.log(`Weather for (${lat},${lng}): temp=${temperature}°C, humidity=${humidity}%, 5-day rain=${fiveDay.toFixed(1)}mm → monthly est=${rainfall}mm`);
-
     // ML payload — key order matches train.py: N, P, K, temperature, humidity, ph, rainfall
     const mlPayload = {
       N: Number(nitrogen),

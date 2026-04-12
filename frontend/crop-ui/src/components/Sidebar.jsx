@@ -104,9 +104,9 @@ export default function Sidebar({ open, onClose }) {
                     {icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold leading-tight"
+                    <p 
                       style={{ color: active ? color : undefined }}
-                      className={active ? "" : "text-gray-800 dark:text-slate-200"}>
+                      className={active ? "" : "text-gray-800 dark:text-slate-200 text-sm font-semibold leading-tight"}>
                       {t(label)}
                     </p>
                     <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5 truncate">{desc}</p>
