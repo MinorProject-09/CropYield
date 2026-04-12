@@ -72,7 +72,7 @@ function OverviewTab({ user, history, historyLoading }) {
         {[
           { icon: "🌾", label: t("Total Predictions"), value: history.length, color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700" },
           { icon: "✅", label: t("Harvests Logged"),   value: history.filter(p => p.actualYieldQ != null).length, color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" },
-          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? (getCropInfo(history[0].recommendedCrop)?.image || "🌾") + " " + history[0].recommendedCrop : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
+          { icon: "🏆", label: t("Best Crop"),         value: history[0] ? `${getCropInfo(history[0].recommendedCrop)?.emoji || "🌾"} ${history[0].recommendedCrop}` : "—", color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" },
           { icon: "📈", label: t("Avg Confidence"),    value: history.length ? Math.round(history.reduce((s, p) => s + p.confidence, 0) / history.length * 100) + "%" : "—", color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700" },
         ].map(({ icon, label, value, color }) => (
           <div key={label} className="stat-card animate-fade-up">

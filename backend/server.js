@@ -85,7 +85,6 @@ io.on("connection", (socket) => {
   socket.on("join", (userId) => {
     if (userId) {
       socket.join(`user:${userId}`);
-      console.log(`📡 Socket joined room user:${userId}`);
     }
   });
   socket.on("disconnect", () => {});
