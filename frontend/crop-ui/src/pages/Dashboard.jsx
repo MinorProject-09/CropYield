@@ -202,7 +202,7 @@ function HistoryTab({ history, loading, onDelete, setHistory }) {
           <div key={p._id} className="card rounded-2xl p-5  hover:border-green-200 dark:hover:border-green-700 transition">
             <div className="flex items-start gap-4">
               <div className="w-40 h-20 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center text-xl flex-shrink-0"> 
-                <img src={info.image} className='w-40 h-20' alt={p.recommendedCrop}></img>
+                <img src={info?.image || "/images/cropImages/default.jpg"} className='w-40 h-20' alt={p.recommendedCrop}></img>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
