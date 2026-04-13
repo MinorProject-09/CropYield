@@ -182,7 +182,7 @@ function Navbar() {
           {/* ── Brand ── */}
           <Link to="/" className="flex items-center gap-2 font-bold text-gray-900 dark:text-slate-100 hover:opacity-80 transition flex-shrink-0">
             <span className="text-xl">🌾</span>
-            <span className="text-base hidden sm:inline">AgriMind <span className="text-emerald-600 dark:text-emerald-400">AI</span></span>
+            <span className="text-base hidden sm:inline">CropAdvisor </span>
           </Link>
 
           {/* ── Spacer ── */}
