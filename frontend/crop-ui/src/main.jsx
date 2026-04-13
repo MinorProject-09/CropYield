@@ -6,6 +6,7 @@ import App from './App.jsx'
 import { LanguageProvider } from "./i18n/LanguageContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>

@@ -234,7 +234,7 @@ export default function WeatherPage() {
         <div className="max-w-5xl mx-auto flex items-start justify-between flex-wrap gap-4">
           <div>
             <p className="text-blue-300 text-xs font-semibold uppercase tracking-widest mb-2">🌤 {t("Weather & Risk")}</p>
-            <h1 className="text-2xl md:text-3xl font-bold">{t("7-Day Farm Forecast")}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">{t("5-Day Farm Forecast")}</h1>
             <p className="text-blue-200/80 text-sm mt-1.5">
               {t("Accurate 5-day forecast with frost, flood, pest, and disease risk alerts.")}
             </p>

@@ -36,7 +36,7 @@ export default function Footer() {
             <div className="flex items-center gap-2.5 mb-5">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-xl">🌾</div>
               <span className="font-extrabold text-white text-lg">
-                CropYield <span className="text-emerald-400">AI</span>
+                AgriMind <span className="text-emerald-400">AI</span>
               </span>
             </div>
             <p className="text-sm text-slate-500 leading-relaxed mb-5">
