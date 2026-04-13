@@ -23,7 +23,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://cropyield-ljg9.onrender.com",
+  "https://crop-yield-lac.vercel.app/",
 ].filter(Boolean);
 
 // ✅ Socket.IO with CORS

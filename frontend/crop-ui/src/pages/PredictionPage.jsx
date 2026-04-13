@@ -513,7 +513,7 @@ export default function PredictionPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
         <div className="mb-8 max-w-2xl">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100 sm:text-4xl">
-            {t("Crop Yield Prediction")}
+            {t("Crop Recommendation")}
           </h1>
           <p className="mt-2 text-base leading-relaxed text-gray-700">
             {t("Enter soil data and timing. Location is detected automatically.")}

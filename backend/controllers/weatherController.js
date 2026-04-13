@@ -11,7 +11,7 @@
  * and IoTDashboard.jsx need zero changes.
  */
 
-const OWM_KEY = process.env.OPENWEATHER_API_KEY;
+const OWM_KEY = process.env.OPEN_WEATHER_MAP_API_KEY;
 const OWM_BASE = "https://api.openweathermap.org/data/2.5";
 
 async function fetchJson(url, timeoutMs = 10000) {
